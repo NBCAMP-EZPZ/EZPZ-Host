@@ -2,6 +2,7 @@ package com.sparta.ezpzhost.domain.popup.entity;
 
 import com.sparta.ezpzhost.common.entity.Timestamped;
 import com.sparta.ezpzhost.domain.host.entity.Host;
+import com.sparta.ezpzhost.domain.popup.dto.ImageResponseDto;
 import com.sparta.ezpzhost.domain.popup.dto.PopupRequestDto;
 import com.sparta.ezpzhost.domain.popup.enums.ApprovalStatus;
 import com.sparta.ezpzhost.domain.popup.enums.PopupStatus;
@@ -33,8 +34,11 @@ public class Popup extends Timestamped {
     @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
-    private String thumbnail;
+    @Column(name = "thumbnail_url", nullable = false)
+    private String thumbnailUrl;
+
+    @Column(name = "thumbnail_name", nullable = false)
+    private String thumbnailName;
 
     @Column(nullable = false)
     private String address;
@@ -59,7 +63,7 @@ public class Popup extends Timestamped {
     @Column(name = "end_date", nullable = false)
     private LocalDateTime endDate;
 
-    private Popup(Host host, String name, String description, String address, String managerName, String phoneNumber, LocalDateTime startDate, LocalDateTime endDate, String thumbnail, PopupStatus popupStatus, ApprovalStatus approvalStatus) {
+    private Popup(Host host, String name, String description, String address, String managerName, String phoneNumber, LocalDateTime startDate, LocalDateTime endDate, String thumbnailUrl, String thumbnailName, PopupStatus popupStatus, ApprovalStatus approvalStatus) {
         this.host = host;
         this.name = name;
         this.description = description;
@@ -69,18 +73,19 @@ public class Popup extends Timestamped {
         this.startDate = startDate;
         this.endDate = endDate;
 
-        this.thumbnail = thumbnail;
+        this.thumbnailUrl = thumbnailUrl;
+        this.thumbnailName = thumbnailName;
         this.popupStatus = popupStatus;
         this.approvalStatus = approvalStatus;
     }
 
-    public static Popup of(Host host, PopupRequestDto requestDto, String thumbnail, PopupStatus popupStatus, ApprovalStatus approvalStatus) {
+    public static Popup of(Host host, PopupRequestDto requestDto, ImageResponseDto thumbnail, PopupStatus popupStatus, ApprovalStatus approvalStatus) {
         return new Popup(
                 host,
                 requestDto.getName(), requestDto.getDescription(), requestDto.getAddress(),
                 requestDto.getManagerName(), requestDto.getPhoneNumber(),
                 requestDto.getStartDate(), requestDto.getEndDate(),
-                thumbnail, popupStatus, approvalStatus
+                thumbnail.getUrl(), thumbnail.getName(), popupStatus, approvalStatus
         );
     }
 }

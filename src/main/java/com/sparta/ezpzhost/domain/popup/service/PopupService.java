@@ -1,6 +1,7 @@
 package com.sparta.ezpzhost.domain.popup.service;
 
 import com.sparta.ezpzhost.domain.host.entity.Host;
+import com.sparta.ezpzhost.domain.popup.dto.ImageResponseDto;
 import com.sparta.ezpzhost.domain.popup.dto.PopupRequestDto;
 import com.sparta.ezpzhost.domain.popup.dto.PopupResponseDto;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
@@ -25,17 +26,17 @@ public class PopupService {
      * 팝업 등록
      *
      * @param requestDto 팝업 등록 정보
-     * @param host
+     * @param host 개최자
      * @return 팝업 정보
      */
     @Transactional
     public PopupResponseDto createPopup(PopupRequestDto requestDto, Host host) {
 
         // 썸네일 업로드
-        String thumbnailUrl = imageService.uploadThumbnail(requestDto.getThumbnail());
+        ImageResponseDto thumbnail = imageService.uploadThumbnail(requestDto.getThumbnail());
 
         Popup popup = Popup.of(
-                host, requestDto, thumbnailUrl, PopupStatus.EXPECTED, ApprovalStatus.REVIEWING);
+                host, requestDto, thumbnail, PopupStatus.EXPECTED, ApprovalStatus.REVIEWING);
 
         Popup savedPopup = popupRepository.save(popup);
 

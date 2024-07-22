@@ -57,8 +57,7 @@ public class ImageService {
      * @param image 썸네일 리소스
      * @return 썸네일 url
      */
-    public String uploadThumbnail(MultipartFile image) {
-        ImageResponseDto responseDto = s3Util.uploadFile(image, "thumbnail");
-        return responseDto.getUrl();
+    public ImageResponseDto uploadThumbnail(MultipartFile image) {
+        return s3Util.uploadFile(image, "thumbnail");
     }
 }
