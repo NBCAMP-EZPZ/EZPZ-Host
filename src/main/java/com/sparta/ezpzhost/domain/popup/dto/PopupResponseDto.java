@@ -9,23 +9,23 @@ import java.util.List;
 @Getter
 public class PopupResponseDto {
 
-    private Long id;
-    private String name;
-    private String description;
-    private String thumbnail;
-    private String address;
-    private String managerName;
-    private String phoneNumber;
-    private String approvalStatus;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private final Long id;
+    private final String name;
+    private final String description;
+    private final String thumbnailUrl;
+    private final String address;
+    private final String managerName;
+    private final String phoneNumber;
+    private final String approvalStatus;
+    private final LocalDateTime startDate;
+    private final LocalDateTime endDate;
     private List<String> images;
 
     private PopupResponseDto(Popup popup) {
         this.id = popup.getId();
         this.name = popup.getName();
         this.description = popup.getDescription();
-        this.thumbnail = popup.getThumbnail();
+        this.thumbnailUrl = popup.getThumbnailUrl();
         this.address = popup.getAddress();
         this.managerName = popup.getManagerName();
         this.phoneNumber = popup.getPhoneNumber();
