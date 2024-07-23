@@ -1,6 +1,8 @@
 package com.sparta.ezpzhost.domain.popup.entity;
 
 import com.sparta.ezpzhost.common.entity.Timestamped;
+import com.sparta.ezpzhost.common.exception.CustomException;
+import com.sparta.ezpzhost.common.exception.ErrorType;
 import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.popup.dto.ImageResponseDto;
 import com.sparta.ezpzhost.domain.popup.dto.PopupRequestDto;
@@ -15,7 +17,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Table(name="Popup")
+@Table(name = "Popup")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Popup extends Timestamped {
 
@@ -87,5 +89,11 @@ public class Popup extends Timestamped {
                 requestDto.getStartDate(), requestDto.getEndDate(),
                 thumbnail.getUrl(), thumbnail.getName(), popupStatus, approvalStatus
         );
+    }
+
+    public void verifyHostOfPopup(Host host) {
+        if (!this.host.getId().equals(host.getId())) {
+            throw new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN);
+        }
     }
 }

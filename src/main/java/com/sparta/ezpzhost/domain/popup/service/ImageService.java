@@ -60,4 +60,10 @@ public class ImageService {
     public ImageResponseDto uploadThumbnail(MultipartFile image) {
         return s3Util.uploadFile(image, "thumbnail");
     }
+
+    public List<String> findAllByPopup(Popup popup) {
+        return imageRepository.findAllByPopup(popup).stream()
+                .map(Image::getUrl)
+                .toList();
+    }
 }

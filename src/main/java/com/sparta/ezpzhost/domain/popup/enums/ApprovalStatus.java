@@ -4,7 +4,7 @@ public enum ApprovalStatus {
     // 심사 중
     REVIEWING,
     // 승인
-    APPROVAL,
+    APPROVED,
     // 반려
-    REJECTION
+    REJECTED
 }

@@ -2,11 +2,11 @@ package com.sparta.ezpzhost.domain.popup.enums;
 
 public enum PopupStatus {
     // 진행 예정
-    EXPECTED,
+    SCHEDULED,
     // 진행 중
-    PROCEEDING,
+    IN_PROGRESS,
     // 종료
-    END,
+    COMPLETED,
     // 취소
-    CANCEL
+    CANCELED
 }

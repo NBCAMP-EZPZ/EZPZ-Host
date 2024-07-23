@@ -17,7 +17,7 @@ public class Image {
     @Column(name = "image_id", nullable = false, unique = true)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "popup_id", nullable = false)
     private Popup popup;
 

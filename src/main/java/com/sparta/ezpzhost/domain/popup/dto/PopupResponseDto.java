@@ -17,11 +17,12 @@ public class PopupResponseDto {
     private final String managerName;
     private final String phoneNumber;
     private final String approvalStatus;
+    private final String popupStatus;
     private final LocalDateTime startDate;
     private final LocalDateTime endDate;
-    private List<String> images;
+    private final List<String> images;
 
-    private PopupResponseDto(Popup popup) {
+    private PopupResponseDto(Popup popup, List<String> images) {
         this.id = popup.getId();
         this.name = popup.getName();
         this.description = popup.getDescription();
@@ -30,15 +31,13 @@ public class PopupResponseDto {
         this.managerName = popup.getManagerName();
         this.phoneNumber = popup.getPhoneNumber();
         this.approvalStatus = popup.getApprovalStatus().toString();
+        this.popupStatus = popup.getPopupStatus().toString();
         this.startDate = popup.getStartDate();
         this.endDate = popup.getEndDate();
-    }
-
-    public static PopupResponseDto of(Popup popup) {
-        return new PopupResponseDto(popup);
-    }
-
-    public void addImages(List<String> images) {
         this.images = images;
+    }
+
+    public static PopupResponseDto of(Popup popup, List<String> images) {
+        return new PopupResponseDto(popup, images);
     }
 }
