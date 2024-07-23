@@ -71,4 +71,20 @@ public class PopupController {
         PopupResponseDto responseDto = popupService.findPopup(popupId, host);
         return getResponseEntity(responseDto, "핍업스토어 상세보기 조회 성공");
     }
+
+    /**
+     * 팝업 수정
+     * @param popupId 팝업 ID
+     * @param requestDto 팝업 수정 정보
+     * @return 팝업 정보
+     */
+    @PutMapping("/v1/popups/{popupId}")
+    public ResponseEntity<?> updatePopup(
+            @PathVariable Long popupId,
+            @ModelAttribute @Valid PopupRequestDto requestDto) {
+        // todo : securiry 구현 완료 시 변경
+        Host host = new Host(1L);
+        PopupResponseDto responseDto = popupService.updatePopup(popupId, requestDto, host);
+        return getResponseEntity(responseDto, "팝업스토어 수정 성공");
+    }
 }

@@ -59,3 +59,54 @@ GET http://localhost:8081/api/v1/popups?approvalStatusBy=reviewing&popupStatus=s
 
 ### 팝업 상세 조회
 GET http://localhost:8081/api/v1/popups/{{popupId}}
+
+### 팝업 수정
+PUT http://localhost:8081/api/v1/popups/{{popupId}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="name";
+
+update name
+
+--boundary
+Content-Disposition: form-data; name="description";
+
+update description
+
+--boundary
+Content-Disposition: form-data; name="address";
+
+update address
+
+--boundary
+Content-Disposition: form-data; name="managerName";
+
+update managerName
+
+--boundary
+Content-Disposition: form-data; name="phoneNumber";
+
+01099999999
+
+--boundary
+Content-Disposition: form-data; name="startDate";
+
+2024-07-19T10:00:00
+
+--boundary
+Content-Disposition: form-data; name="endDate";
+
+2024-08-19T10:00:00
+
+--boundary
+Content-Disposition: form-data; name="thumbnail"; filename="thumbnail.jpeg";
+Content-Type: image/png
+
+< images/image.png
+
+--boundary
+Content-Disposition: form-data; name="images"; filename="image1.png";
+Content-Type: image/png
+
+< images/image.png

@@ -8,6 +8,7 @@ import com.sparta.ezpzhost.domain.popup.dto.ImageResponseDto;
 import com.sparta.ezpzhost.domain.popup.dto.PopupPageResponseDto;
 import com.sparta.ezpzhost.domain.popup.dto.PopupRequestDto;
 import com.sparta.ezpzhost.domain.popup.dto.PopupResponseDto;
+import com.sparta.ezpzhost.domain.popup.entity.Image;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
 import com.sparta.ezpzhost.domain.popup.enums.ApprovalStatus;
 import com.sparta.ezpzhost.domain.popup.enums.PopupStatus;
@@ -72,12 +73,52 @@ public class PopupService {
      * @return 팝업 상세정보
      */
     public PopupResponseDto findPopup(Long popupId, Host host) {
-        Popup popup = popupRepository.findById(popupId)
-                .orElseThrow(()-> new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN));
+        Popup popup = findPopupById(popupId);
         popup.verifyHostOfPopup(host);
 
         List<String> imageUrls = imageService.findAllByPopup(popup);
 
         return PopupResponseDto.of(popup, imageUrls);
+    }
+
+    /**
+     * 팝업 수정
+     * @param popupId 팝업 ID
+     * @param requestDto 팝업 수정 정보
+     * @param host 호스트
+     * @return 팝업 정보
+     */
+    @Transactional
+    public PopupResponseDto updatePopup(Long popupId, PopupRequestDto requestDto, Host host) {
+        Popup popup = findPopupById(popupId);
+        popup.verifyHostOfPopup(host);
+
+        String thumbnailName = popup.getThumbnailName();
+        List<Image> imageNames = imageService.findAllImageByPopup(popup);
+
+        // 썸네일 업로드
+        ImageResponseDto updateThumbnail = imageService.uploadThumbnail(requestDto.getThumbnail());
+        // 추가 사진 저장 및 업로드
+        List<String> updateImageUrls = imageService.saveImages(popup, requestDto.getImages());
+
+        // 썸네일 수정
+        popup.updateThumbnail(updateThumbnail);
+        Popup savedPopup = popupRepository.save(popup);
+
+        // 이전 썸네일, 추가 사진 삭제 (S3)
+        imageService.deleteThumbnail(thumbnailName);
+        imageService.deleteImages(imageNames);
+
+        return PopupResponseDto.of(savedPopup, updateImageUrls);
+    }
+
+    /**
+     * ID로 팝업 찾기
+     * @param popupId 팝업 ID
+     * @return 팝업
+     */
+    private Popup findPopupById(Long popupId) {
+        return popupRepository.findById(popupId)
+                .orElseThrow(()-> new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN));
     }
 }

@@ -91,9 +91,18 @@ public class Popup extends Timestamped {
         );
     }
 
+    /**
+     * 팝업 권한 검증
+     * @param host 호스트
+     */
     public void verifyHostOfPopup(Host host) {
         if (!this.host.getId().equals(host.getId())) {
             throw new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN);
         }
+    }
+
+    public void updateThumbnail(ImageResponseDto updateThumbnail) {
+        this.thumbnailUrl = updateThumbnail.getUrl();
+        this.thumbnailName = updateThumbnail.getName();
     }
 }
