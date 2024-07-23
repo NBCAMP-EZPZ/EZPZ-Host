@@ -1,5 +1,5 @@
 ## Variables
-@popupId = 28
+@popupId = 27
 
 ### 팝업 등록
 POST http://localhost:8081/api/v1/popups
@@ -110,3 +110,6 @@ Content-Disposition: form-data; name="images"; filename="image1.png";
 Content-Type: image/png
 
 < images/image.png
+
+### 팝업 취소
+PATCH http://localhost:8081/api/v1/popups/{{popupId}}

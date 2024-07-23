@@ -101,8 +101,28 @@ public class Popup extends Timestamped {
         }
     }
 
+    /**
+     * 썸네일 수정
+     * @param updateThumbnail 썸네일 수정 정보
+     */
     public void updateThumbnail(ImageResponseDto updateThumbnail) {
         this.thumbnailUrl = updateThumbnail.getUrl();
         this.thumbnailName = updateThumbnail.getName();
+    }
+
+    /**
+     * 취소 가능한 팝업 상태인지 확인
+     */
+    public void checkCancellationPossible() {
+        if (!this.popupStatus.equals(PopupStatus.SCHEDULED)) {
+            throw new CustomException(ErrorType.POPUP_CANCEL_FORBIDDEN);
+        }
+    }
+
+    /**
+     * 팝업 취소
+     */
+    public void cancelPopup() {
+        this.popupStatus = PopupStatus.CANCELED;
     }
 }

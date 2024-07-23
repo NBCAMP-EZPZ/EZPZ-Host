@@ -87,4 +87,18 @@ public class PopupController {
         PopupResponseDto responseDto = popupService.updatePopup(popupId, requestDto, host);
         return getResponseEntity(responseDto, "팝업스토어 수정 성공");
     }
+
+    /**
+     * 팝업 취소
+     * @param popupId 팝업 ID
+     * @return 성공 메시지
+     */
+    @PatchMapping("/v1/popups/{popupId}")
+    public ResponseEntity<?> cancelPopup(
+            @PathVariable Long popupId) {
+        // todo : securiry 구현 완료 시 변경
+        Host host = new Host(1L);
+        popupService.cancelPopup(popupId, host);
+        return getResponseEntity("팝업스토어 수정 성공");
+    }
 }

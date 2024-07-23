@@ -113,6 +113,26 @@ public class PopupService {
     }
 
     /**
+     * 팝업 취소
+     * @param popupId 팝업 ID
+     * @param host 호스트
+     */
+    @Transactional
+    public void cancelPopup(Long popupId, Host host) {
+        Popup popup = findPopupById(popupId);
+        popup.verifyHostOfPopup(host);
+        popup.checkCancellationPossible();
+
+        String thumbnailName = popup.getThumbnailName();
+        List<Image> imageNames = imageService.findAllImageByPopup(popup);
+
+        imageService.deleteImages(imageNames);
+        imageService.deleteThumbnail(thumbnailName);
+
+        popup.cancelPopup();
+    }
+
+    /**
      * ID로 팝업 찾기
      * @param popupId 팝업 ID
      * @return 팝업
