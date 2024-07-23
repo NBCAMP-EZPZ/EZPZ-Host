@@ -1,5 +1,5 @@
 ## Variables
-@popupId = 27
+@popupId = 28
 
 ### 팝업 등록
 POST http://localhost:8081/api/v1/popups
@@ -53,9 +53,9 @@ Content-Type: image/png
 < images/image.png
 
 ### 호스트의 상태별 팝업 목록 조회
-### 승인 상태 : approvalStatusBy=(reviewing, approved, rejected)
+### 승인 상태 : approvalStatus=(reviewing, approved, rejected)
 ### 팝업 상태 : popupStatus=(scheduled, in_progress, completed, canceled)
-GET http://localhost:8081/api/v1/popups?approvalStatusBy=reviewing&popupStatus=scheduled
+GET http://localhost:8081/api/v1/popups?approvalStatus=reviewing&popupStatus=scheduled
 
 ### 팝업 상세 조회
 GET http://localhost:8081/api/v1/popups/{{popupId}}

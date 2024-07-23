@@ -1,6 +1,5 @@
-package com.sparta.ezpzhost.common.dto;
+package com.sparta.ezpzhost.common.util;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.domain.PageRequest;
@@ -11,14 +10,14 @@ import java.util.Objects;
 
 @Getter
 @Builder
-@AllArgsConstructor
-public class PageDto {
+public class PageUtil {
 
     private int page;
     private int size;
     private String sortBy;
-    private String approvalStatusBy;
-    private String popupStatus;
+    private String firstStatus;
+    private String secondStatus;
+    private String thirdStatus;
 
     public Pageable toPageable() {
         if (Objects.isNull(sortBy)) {

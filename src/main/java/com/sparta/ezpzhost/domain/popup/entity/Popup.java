@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Table(name = "Popup")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Popup extends Timestamped {
 
@@ -92,22 +91,26 @@ public class Popup extends Timestamped {
     }
 
     /**
-     * 팝업 권한 검증
-     * @param host 호스트
-     */
-    public void verifyHostOfPopup(Host host) {
-        if (!this.host.getId().equals(host.getId())) {
-            throw new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN);
-        }
-    }
-
-    /**
      * 썸네일 수정
      * @param updateThumbnail 썸네일 수정 정보
      */
     public void updateThumbnail(ImageResponseDto updateThumbnail) {
         this.thumbnailUrl = updateThumbnail.getUrl();
         this.thumbnailName = updateThumbnail.getName();
+    }
+
+    /**
+     * 팝업 정보 수정
+     * @param requestDto 팝업 수정 정보
+     */
+    public void update(PopupRequestDto requestDto) {
+        this.name = requestDto.getName();
+        this.description = requestDto.getDescription();
+        this.address = requestDto.getAddress();
+        this.managerName = requestDto.getManagerName();
+        this.phoneNumber = requestDto.getPhoneNumber();
+        this.startDate = requestDto.getStartDate();
+        this.endDate = requestDto.getEndDate();
     }
 
     /**

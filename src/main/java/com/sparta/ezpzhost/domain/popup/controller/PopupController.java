@@ -1,6 +1,6 @@
 package com.sparta.ezpzhost.domain.popup.controller;
 
-import com.sparta.ezpzhost.common.dto.PageDto;
+import com.sparta.ezpzhost.common.util.PageUtil;
 import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.popup.dto.PopupRequestDto;
 import com.sparta.ezpzhost.domain.popup.dto.PopupResponseDto;
@@ -39,7 +39,7 @@ public class PopupController {
      * @param page 페이지
      * @param size 개수
      * @param sortBy 정렬 기준
-     * @param approvalStatusBy 승인 상태
+     * @param approvalStatus 승인 상태
      * @param popupStatus 팝업 상태
      * @return 팝업 목록
      */
@@ -48,14 +48,20 @@ public class PopupController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "all") String approvalStatusBy,
+            @RequestParam(defaultValue = "all") String approvalStatus,
             @RequestParam(defaultValue = "all") String popupStatus) {
         // todo : securiry 구현 완료 시 변경
         Host host = new Host(1L);
 
-        PageDto pageDto = new PageDto(page, size, sortBy, approvalStatusBy, popupStatus);
+        PageUtil pageUtil = PageUtil.builder()
+                .page(page)
+                .size(size)
+                .sortBy(sortBy)
+                .firstStatus(approvalStatus)
+                .secondStatus(popupStatus)
+                .build();
 
-        Page<?> popupList = popupService.findAllPopupsByStatus(host, pageDto);
+        Page<?> popupList = popupService.findAllPopupsByStatus(host, pageUtil);
         return getResponseEntity(popupList, "호스트의 팝업 목록 조회 성공");
     }
 
