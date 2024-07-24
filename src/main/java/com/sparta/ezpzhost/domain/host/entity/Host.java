@@ -14,7 +14,7 @@ public class Host extends Timestamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "host_id")
+    @Column(name = "host_id", nullable = false, unique = true)
     private Long id;
 
     private String username;
