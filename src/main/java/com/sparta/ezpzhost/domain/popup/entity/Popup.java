@@ -127,5 +127,6 @@ public class Popup extends Timestamped {
      */
     public void cancelPopup() {
         this.popupStatus = PopupStatus.CANCELED;
+        this.approvalStatus = ApprovalStatus.REJECTED;
     }
 }
