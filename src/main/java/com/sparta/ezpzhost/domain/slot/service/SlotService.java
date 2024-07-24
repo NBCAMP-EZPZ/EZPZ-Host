@@ -16,6 +16,7 @@ import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
 import com.sparta.ezpzhost.domain.popup.enums.ApprovalStatus;
 import com.sparta.ezpzhost.domain.popup.repository.PopupRepository;
+import com.sparta.ezpzhost.domain.slot.dto.SlotCreateDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotRequestDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotResponseDto;
 import com.sparta.ezpzhost.domain.slot.entity.Slot;
@@ -57,7 +58,7 @@ public class SlotService {
 		// 예약 가능한 슬롯 생성
 		for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
 			for (LocalTime time = startTime; !time.isAfter(endTime); time = time.plusHours(1)) {
-				Slot slot = Slot.of(date, time, availableCount, totalCount, popup);
+				Slot slot = Slot.of(SlotCreateDto.of(date, time, availableCount, totalCount, popup));
 				slotList.add(slot);
 			}
 		}

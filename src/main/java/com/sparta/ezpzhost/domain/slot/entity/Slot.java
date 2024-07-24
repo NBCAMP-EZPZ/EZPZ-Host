@@ -5,6 +5,7 @@ import java.time.LocalTime;
 
 import com.sparta.ezpzhost.common.entity.Timestamped;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
+import com.sparta.ezpzhost.domain.slot.dto.SlotCreateDto;
 import com.sparta.ezpzhost.domain.slot.enums.SlotStatus;
 
 import jakarta.persistence.Column;
@@ -30,36 +31,31 @@ public class Slot extends Timestamped {
 	@Column(name = "slot_id")
 	private Long id;
 	
-	@Column(nullable = false)
 	private LocalDate slotDate;
 	
-	@Column(nullable = false)
 	private LocalTime slotTime;
 	
-	@Column(nullable = false)
 	private int availableCount;
 	
-	@Column(nullable = false)
 	private int totalCount;
 	
 	@Enumerated(value = EnumType.STRING)
-	@Column(nullable = false)
 	private SlotStatus slotStatus;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "popup_id", nullable = false)
 	private Popup popup;
 	
-	private Slot(LocalDate slotDate, LocalTime slotTime, int availableCount, int totalCount, Popup popup) {
-		this.slotDate = slotDate;
-		this.slotTime = slotTime;
-		this.availableCount = availableCount;
-		this.totalCount = totalCount;
+	private Slot(SlotCreateDto slotCreateDto) {
+		this.slotDate = slotCreateDto.getDate();
+		this.slotTime = slotCreateDto.getTime();
+		this.availableCount = slotCreateDto.getAvailableCount();
+		this.totalCount = slotCreateDto.getTotalCount();
 		this.slotStatus = SlotStatus.PROCEEDING;
-		this.popup = popup;
+		this.popup = slotCreateDto.getPopup();
 	}
 	
-	public static Slot of(LocalDate slotDate, LocalTime slotTime, int availableCount, int totalCount, Popup popup) {
-		return new Slot(slotDate, slotTime, availableCount, totalCount, popup);
+	public static Slot of(SlotCreateDto slotCreateDto) {
+		return new Slot(slotCreateDto);
 	}
 }
