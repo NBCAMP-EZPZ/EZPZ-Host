@@ -16,24 +16,30 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none  # Hibernate 자동 DDL 생성 옵션
+      ddl-auto: ${DDL_AUTO}  # Hibernate 자동 DDL 생성 옵션
 
     properties:
       hibernate:
         default_batch_fetch_size: 1000
         format_sql: true  # SQL 쿼리 포맷팅 여부 - 프로덕션 환경에서는 보안, 성능 고려해서 사용
         use_sql_comments: true  # SQL 쿼리 주석 사용 여부 - 보안, 성능 이슈, (실행되는 JPQL을 볼 수 있다.)
-#        show_sql: true  # SQL 쿼리 출력 여부 - 프로덕션 환경에서는 보안, 성능 이슈로 비활성화
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
 logging.level:
   org.hibernate.SQL: debug  # Hibernate SQL 쿼리를 debug 레벨로 설정하여 로깅합니다.
   org.hibernate.orm.jdbc.bind: trace  # 스프링 부트 3.x, Hibernate 6.x에서 JDBC 바인딩을 trace 레벨로 설정합니다.
 
-
-# JWT 토큰 서명을 위한 비밀 키
 jwt:
   secret:
     key: ${JWT_SECRET_KEY}
+  access-token:
+    ttl: ${ACCESS_TOKEN_TTL}
+  refresh-token:
+    ttl: ${REFRESH_TOKEN_TTL}
 
 server:
   port: ${SERVER_PORT}
