@@ -15,9 +15,9 @@ public class PageUtil {
     private int page;
     private int size;
     private String sortBy;
-    private String firstStatus;
-    private String secondStatus;
-    private String thirdStatus;
+    private String firstCondition;
+    private String secondCondition;
+    private String thirdCondition;
 
     public Pageable toPageable() {
         if (Objects.isNull(sortBy)) {

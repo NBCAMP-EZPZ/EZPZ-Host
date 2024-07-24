@@ -7,6 +7,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.ezpzhost.common.util.PageUtil;
 import com.sparta.ezpzhost.domain.host.entity.Host;
+import com.sparta.ezpzhost.domain.popup.dto.PopupCondition;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
 import com.sparta.ezpzhost.domain.popup.enums.ApprovalStatus;
 import com.sparta.ezpzhost.domain.popup.enums.PopupStatus;
@@ -25,35 +26,35 @@ public class PopupRepositoryCustomImpl implements PopupRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<Popup> findAllPopupsByStatus(Host host, PageUtil pageUtil) {
-        JPAQuery<Popup> query = findAllPopupsByStatusQuery(popup, host, pageUtil)
+    public Page<Popup> findAllPopupsByStatus(Host host, PageUtil pageUtil, PopupCondition cond) {
+        JPAQuery<Popup> query = findAllPopupsByStatusQuery(popup, host, cond)
                 .offset(pageUtil.toPageable().getOffset())
                 .limit(pageUtil.toPageable().getPageSize())
                 .orderBy(popup.createdAt.desc());
 
         List<Popup> popups = query.fetch();
-        Long totalSize = countQuery(host, pageUtil).fetch().get(0);
+        Long totalSize = countQuery(host, cond).fetch().get(0);
 
         return PageableExecutionUtils.getPage(popups, pageUtil.toPageable(), () -> totalSize);
     }
 
-    private <T> JPAQuery<T> findAllPopupsByStatusQuery(Expression<T> expr, Host host, PageUtil pageUtil) {
+    private <T> JPAQuery<T> findAllPopupsByStatusQuery(Expression<T> expr, Host host, PopupCondition cond) {
         return jpaQueryFactory.select(expr)
                 .from(popup)
                 .where(
                         hostEq(host),
-                        approvalStatusEq(pageUtil.getFirstStatus()),
-                        popupStatusEq(pageUtil.getSecondStatus())
+                        approvalStatusEq(cond.getApprovalStatus()),
+                        popupStatusEq(cond.getPopupStatus())
                 );
     }
 
-    private JPAQuery<Long> countQuery(Host host, PageUtil pageUtil) {
+    private JPAQuery<Long> countQuery(Host host, PopupCondition cond) {
         return jpaQueryFactory.select(Wildcard.count)
                 .from(popup)
                 .where(
                         hostEq(host),
-                        approvalStatusEq(pageUtil.getFirstStatus()),
-                        popupStatusEq(pageUtil.getSecondStatus())
+                        approvalStatusEq(cond.getApprovalStatus()),
+                        popupStatusEq(cond.getPopupStatus())
                 );
     }
 

@@ -22,7 +22,7 @@ public class Popup extends Timestamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "popup_id", nullable = false, unique = true)
+    @Column(name = "popup_id")
     private Long id;
 
     @ManyToOne
@@ -126,5 +126,15 @@ public class Popup extends Timestamped {
     public void cancelPopup() {
         this.popupStatus = PopupStatus.CANCELED;
         this.approvalStatus = ApprovalStatus.REJECTED;
+    }
+
+    /**
+     * 상품 등록 가능 여부 확인
+     */
+    public void checkItemCanBeRegistered() {
+        if (this.approvalStatus.equals(ApprovalStatus.REVIEWING) ||
+        this.approvalStatus.equals(ApprovalStatus.REJECTED)) {
+            throw new CustomException(ErrorType.ITEM_REGISTRATION_IMPOSSIBLE);
+        }
     }
 }

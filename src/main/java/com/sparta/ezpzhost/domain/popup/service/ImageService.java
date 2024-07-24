@@ -6,7 +6,7 @@ import com.sparta.ezpzhost.domain.popup.dto.ImageResponseDto;
 import com.sparta.ezpzhost.domain.popup.entity.Image;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
 import com.sparta.ezpzhost.domain.popup.repository.ImageRepository;
-import com.sparta.ezpzhost.domain.popup.util.S3Util;
+import com.sparta.ezpzhost.common.util.S3Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,6 +63,15 @@ public class ImageService {
     }
 
     /**
+     * 상품 사진 S3 업로드
+     * @param image 상품 사진 리소스
+     * @return 상품 사진 url
+     */
+    public ImageResponseDto uploadItemImage(MultipartFile image) {
+        return s3Util.uploadFile(image, "item");
+    }
+
+    /**
      * 팝업으로 이미지 url 목록 조회
      * @param popup 팝업
      * @return 이미지 url 목록
@@ -104,5 +113,13 @@ public class ImageService {
         }
 
         imageRepository.deleteAll(images);
+    }
+
+    /**
+     * 상품 사진 삭제 (S3)
+     * @param imageName 상품 사진 저장명
+     */
+    public void deleteItemImage(String imageName) {
+        s3Util.deleteFile(imageName);
     }
 }

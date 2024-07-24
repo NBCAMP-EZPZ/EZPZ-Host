@@ -3,6 +3,7 @@ package com.sparta.ezpzhost.domain.popup.controller;
 import com.sparta.ezpzhost.common.security.UserDetailsImpl;
 import com.sparta.ezpzhost.common.util.PageUtil;
 import com.sparta.ezpzhost.domain.host.entity.Host;
+import com.sparta.ezpzhost.domain.popup.dto.PopupCondition;
 import com.sparta.ezpzhost.domain.popup.dto.PopupRequestDto;
 import com.sparta.ezpzhost.domain.popup.dto.PopupResponseDto;
 import com.sparta.ezpzhost.domain.popup.service.PopupService;
@@ -56,11 +57,11 @@ public class PopupController {
                 .page(page)
                 .size(size)
                 .sortBy(sortBy)
-                .firstStatus(approvalStatus)
-                .secondStatus(popupStatus)
                 .build();
 
-        Page<?> popupList = popupService.findAllPopupsByStatus(userDetails.getHost(), pageUtil);
+        PopupCondition cond = PopupCondition.of(approvalStatus, popupStatus);
+
+        Page<?> popupList = popupService.findAllPopupsByStatus(userDetails.getHost(), pageUtil, cond);
         return getResponseEntity(popupList, "호스트의 팝업 목록 조회 성공");
     }
 

@@ -6,6 +6,7 @@ import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sparta.ezpzhost.domain.popup.repository.popup.PopupRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +15,6 @@ import com.sparta.ezpzhost.common.exception.ErrorType;
 import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
 import com.sparta.ezpzhost.domain.popup.enums.ApprovalStatus;
-import com.sparta.ezpzhost.domain.popup.repository.PopupRepository;
 import com.sparta.ezpzhost.domain.slot.dto.SlotCreateDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotRequestDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotResponseDto;
@@ -82,7 +82,7 @@ public class SlotService {
 		Popup popup = popupRepository.findByIdAndHostId(popupId, hostId)
 			.orElseThrow(() -> new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN));
 		
-		if (popup.getApprovalStatus().equals(ApprovalStatus.APPROVAL)) {
+		if (popup.getApprovalStatus().equals(ApprovalStatus.APPROVED)) {
 			throw new CustomException(ErrorType.POPUP_NOT_APPROVAL);
 		}
 		

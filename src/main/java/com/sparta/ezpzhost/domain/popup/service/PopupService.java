@@ -4,10 +4,7 @@ import com.sparta.ezpzhost.common.util.PageUtil;
 import com.sparta.ezpzhost.common.exception.CustomException;
 import com.sparta.ezpzhost.common.exception.ErrorType;
 import com.sparta.ezpzhost.domain.host.entity.Host;
-import com.sparta.ezpzhost.domain.popup.dto.ImageResponseDto;
-import com.sparta.ezpzhost.domain.popup.dto.PopupPageResponseDto;
-import com.sparta.ezpzhost.domain.popup.dto.PopupRequestDto;
-import com.sparta.ezpzhost.domain.popup.dto.PopupResponseDto;
+import com.sparta.ezpzhost.domain.popup.dto.*;
 import com.sparta.ezpzhost.domain.popup.entity.Image;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
 import com.sparta.ezpzhost.domain.popup.enums.ApprovalStatus;
@@ -59,12 +56,14 @@ public class PopupService {
 
     /**
      * 상태별 팝업 목록 조회
-     * @param host 호스트
+     *
+     * @param host     호스트
      * @param pageUtil 페이징 기준 정보
+     * @param cond
      * @return 팝업 목록
      */
-    public Page<?> findAllPopupsByStatus(Host host, PageUtil pageUtil) {
-        return popupRepository.findAllPopupsByStatus(host, pageUtil)
+    public Page<?> findAllPopupsByStatus(Host host, PageUtil pageUtil, PopupCondition cond) {
+        return popupRepository.findAllPopupsByStatus(host, pageUtil, cond)
                 .map(PopupPageResponseDto::of);
     }
 
@@ -91,6 +90,12 @@ public class PopupService {
      */
     @Transactional
     public PopupResponseDto updatePopup(Long popupId, PopupRequestDto requestDto, Host host) {
+
+        // 팝업명 중복 체크
+        if (popupRepository.existsByName(requestDto.getName())) {
+            throw new CustomException(ErrorType.DUPLICATED_POPUP_NAME);
+        }
+
         Popup popup = findPopupByIdAndHostId(popupId, host.getId());
 
         String thumbnailName = popup.getThumbnailName();
@@ -136,7 +141,7 @@ public class PopupService {
      * @param popupId 팝업 ID
      * @return 팝업
      */
-    private Popup findPopupByIdAndHostId(Long popupId, Long hostId) {
+    public Popup findPopupByIdAndHostId(Long popupId, Long hostId) {
         return popupRepository.findByIdAndHostId(popupId, hostId)
                 .orElseThrow(()-> new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN));
     }

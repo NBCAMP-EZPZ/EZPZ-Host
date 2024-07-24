@@ -10,7 +10,7 @@ Content-Type: multipart/form-data; boundary=boundary
 --boundary
 Content-Disposition: form-data; name="name";
 
-name
+name6
 
 --boundary
 Content-Disposition: form-data; name="description";
@@ -57,7 +57,7 @@ Content-Type: image/png
 ### 호스트의 상태별 팝업 목록 조회
 ### 승인 상태 : approvalStatus=(reviewing, approved, rejected)
 ### 팝업 상태 : popupStatus=(scheduled, in_progress, completed, canceled)
-GET http://localhost:8081/api/v1/popups?approvalStatus=reviewing&popupStatus=scheduled
+GET http://localhost:8081/api/v1/popups?approvalStatus=approved&popupStatus=scheduled
 Authorization: {{Authorization}}
 Cookie: {{Cookie}}
 
