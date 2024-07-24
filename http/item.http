@@ -1,6 +1,6 @@
 ## Variables
 @popupId = 31
-@itemId = 2
+@itemId = 4
 
 ### 굿즈 상품 등록
 POST http://localhost:8081/api/v1/popups/{{popupId}}/items
@@ -11,7 +11,7 @@ Content-Type: multipart/form-data; boundary=boundary
 --boundary
 Content-Disposition: form-data; name="name";
 
-name4
+name43
 
 --boundary
 Content-Disposition: form-data; name="description";
@@ -55,7 +55,7 @@ Content-Type: multipart/form-data; boundary=boundary
 --boundary
 Content-Disposition: form-data; name="name";
 
-update name
+update name2
 
 --boundary
 Content-Disposition: form-data; name="description";
@@ -79,6 +79,6 @@ Content-Type: image/png
 < images/image.png
 
 ### 상품 상태 변경 (before_sale, sale, sale_end, sold_out)
-PATCH http://localhost:8081/api/v1/items/{{itemId}}?itemStatus=before_sale
+PATCH http://localhost:8081/api/v1/items/{{itemId}}?itemStatus=sale
 Authorization: {{Authorization}}
 Cookie: {{Cookie}}

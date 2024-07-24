@@ -90,7 +90,7 @@ public class Item extends Timestamped {
             throw new CustomException(ErrorType.INVALID_ITEM_STATUS);
         } else if (this.itemStatus.equals(ItemStatus.SALE_END)) {
             throw new CustomException(ErrorType.ITEM_ALREADY_QUIT);
-        } else if (this.itemStatus.equals(ItemStatus.BEFORE_SALE)) {
+        } else if (ItemStatus.BEFORE_SALE.equals(ItemStatus.valueOf(itemStatus.toUpperCase()))) {
             throw new CustomException(ErrorType.INVALID_ITEM_STATUS);
         }
 
