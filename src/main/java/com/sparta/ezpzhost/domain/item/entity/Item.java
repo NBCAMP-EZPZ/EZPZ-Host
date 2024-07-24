@@ -11,6 +11,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.util.StringUtils;
 
 @Entity
 @Getter
@@ -82,12 +83,21 @@ public class Item extends Timestamped {
     }
 
     /**
-     * 상품 판매 종료 확인
+     * 상품 상태 변경
      */
-    public void saleQuitItem() {
-        if (this.itemStatus.equals(ItemStatus.SALE_END)) {
+    public void changeItemStatus(String itemStatus) {
+        if (!StringUtils.hasText(itemStatus)) {
+            throw new CustomException(ErrorType.INVALID_ITEM_STATUS);
+        } else if (this.itemStatus.equals(ItemStatus.SALE_END)) {
             throw new CustomException(ErrorType.ITEM_ALREADY_QUIT);
+        } else if (this.itemStatus.equals(ItemStatus.BEFORE_SALE)) {
+            throw new CustomException(ErrorType.INVALID_ITEM_STATUS);
         }
-        this.itemStatus = ItemStatus.SALE_END;
+
+        try {
+            this.itemStatus = ItemStatus.valueOf(itemStatus.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new CustomException(ErrorType.INVALID_ITEM_STATUS);
+        }
     }
 }

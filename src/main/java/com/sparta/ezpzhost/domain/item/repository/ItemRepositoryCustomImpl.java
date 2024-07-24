@@ -12,6 +12,7 @@ import com.sparta.ezpzhost.domain.item.entity.Item;
 import com.sparta.ezpzhost.domain.item.enums.ItemStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
@@ -25,16 +26,16 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<Item> findAllItemsByPopupAndStatus(Host host, PageUtil pageUtil, ItemCondition cond) {
+    public Page<Item> findAllItemsByPopupAndStatus(Host host, Pageable pageable, ItemCondition cond) {
         JPAQuery<Item> query = findAllItemsByPopupAndStatusQuery(item, host, cond)
-                .offset(pageUtil.toPageable().getOffset())
-                .limit(pageUtil.toPageable().getPageSize())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .orderBy(item.createdAt.desc());
 
         List<Item> items = query.fetch();
         Long totalSize = findAllItemsByPopupAndStatusCount(host, cond).fetch().get(0);
 
-        return PageableExecutionUtils.getPage(items, pageUtil.toPageable(), () -> totalSize);
+        return PageableExecutionUtils.getPage(items, pageable, () -> totalSize);
     }
 
     private <T> JPAQuery<T> findAllItemsByPopupAndStatusQuery(Expression<T> expr, Host host, ItemCondition cond) {

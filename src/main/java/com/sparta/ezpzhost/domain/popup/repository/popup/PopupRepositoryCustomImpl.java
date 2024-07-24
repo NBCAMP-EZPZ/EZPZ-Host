@@ -5,7 +5,6 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.sparta.ezpzhost.common.util.PageUtil;
 import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.popup.dto.PopupCondition;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
@@ -13,6 +12,7 @@ import com.sparta.ezpzhost.domain.popup.enums.ApprovalStatus;
 import com.sparta.ezpzhost.domain.popup.enums.PopupStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
@@ -26,16 +26,16 @@ public class PopupRepositoryCustomImpl implements PopupRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<Popup> findAllPopupsByStatus(Host host, PageUtil pageUtil, PopupCondition cond) {
+    public Page<Popup> findAllPopupsByStatus(Host host, Pageable pageable, PopupCondition cond) {
         JPAQuery<Popup> query = findAllPopupsByStatusQuery(popup, host, cond)
-                .offset(pageUtil.toPageable().getOffset())
-                .limit(pageUtil.toPageable().getPageSize())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .orderBy(popup.createdAt.desc());
 
         List<Popup> popups = query.fetch();
         Long totalSize = countQuery(host, cond).fetch().get(0);
 
-        return PageableExecutionUtils.getPage(popups, pageUtil.toPageable(), () -> totalSize);
+        return PageableExecutionUtils.getPage(popups, pageable, () -> totalSize);
     }
 
     private <T> JPAQuery<T> findAllPopupsByStatusQuery(Expression<T> expr, Host host, PopupCondition cond) {

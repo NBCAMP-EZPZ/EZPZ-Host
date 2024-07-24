@@ -2,7 +2,6 @@ package com.sparta.ezpzhost.domain.item.service;
 
 import com.sparta.ezpzhost.common.exception.CustomException;
 import com.sparta.ezpzhost.common.exception.ErrorType;
-import com.sparta.ezpzhost.common.util.PageUtil;
 import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.item.dto.ItemCondition;
 import com.sparta.ezpzhost.domain.item.dto.ItemPageResponseDto;
@@ -16,6 +15,7 @@ import com.sparta.ezpzhost.domain.popup.service.ImageService;
 import com.sparta.ezpzhost.domain.popup.service.PopupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,12 +58,12 @@ public class ItemService {
     /**
      * 팝업 및 상태별 상품 목록 조회
      * @param host 호스트
-     * @param pageUtil 정렬 기준
+     * @param pageable 페이징
      * @param cond 조회 조건
      * @return 상품 목록
      */
-    public Page<?> findAllItemsByPopupAndStatus(Host host, PageUtil pageUtil, ItemCondition cond) {
-        return itemRepository.findAllItemsByPopupAndStatus(host, pageUtil, cond)
+    public Page<?> findAllItemsByPopupAndStatus(Host host, Pageable pageable, ItemCondition cond) {
+        return itemRepository.findAllItemsByPopupAndStatus(host, pageable, cond)
                 .map(ItemPageResponseDto::of);
     }
 
@@ -108,14 +108,16 @@ public class ItemService {
     }
 
     /**
-     * 상품 판매 종료
-     * @param itemId 상품 ID
-     * @param host 호스트
+     * 상품 상태 변경
+     *
+     * @param itemId     상품 ID
+     * @param itemStatus 상품 상태
+     * @param host       호스트
      */
     @Transactional
-    public void saleQuitItem(Long itemId, Host host) {
+    public void changeItemStatus(Long itemId, String itemStatus, Host host) {
         Item item = findItemByIdAndHost(itemId, host);
-        item.saleQuitItem();
+        item.changeItemStatus(itemStatus);
 
         imageService.deleteItemImage(item.getImageName());
     }

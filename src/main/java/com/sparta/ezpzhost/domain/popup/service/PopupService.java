@@ -12,6 +12,7 @@ import com.sparta.ezpzhost.domain.popup.enums.PopupStatus;
 import com.sparta.ezpzhost.domain.popup.repository.popup.PopupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,12 +59,12 @@ public class PopupService {
      * 상태별 팝업 목록 조회
      *
      * @param host     호스트
-     * @param pageUtil 페이징 기준 정보
-     * @param cond
+     * @param pageable 페이징
+     * @param cond 조회 조건
      * @return 팝업 목록
      */
-    public Page<?> findAllPopupsByStatus(Host host, PageUtil pageUtil, PopupCondition cond) {
-        return popupRepository.findAllPopupsByStatus(host, pageUtil, cond)
+    public Page<?> findAllPopupsByStatus(Host host, Pageable pageable, PopupCondition cond) {
+        return popupRepository.findAllPopupsByStatus(host, pageable, cond)
                 .map(PopupPageResponseDto::of);
     }
 
