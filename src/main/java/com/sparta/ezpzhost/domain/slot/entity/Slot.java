@@ -39,6 +39,8 @@ public class Slot extends Timestamped {
 	
 	private int totalCount;
 	
+	private int reservedCount;
+	
 	@Enumerated(value = EnumType.STRING)
 	private SlotStatus slotStatus;
 	
@@ -51,6 +53,7 @@ public class Slot extends Timestamped {
 		this.slotTime = slotCreateDto.getTime();
 		this.availableCount = slotCreateDto.getAvailableCount();
 		this.totalCount = slotCreateDto.getTotalCount();
+		this.reservedCount = 0;
 		this.slotStatus = SlotStatus.PROCEEDING;
 		this.popup = slotCreateDto.getPopup();
 	}
