@@ -5,7 +5,6 @@ import java.time.LocalTime;
 import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +50,7 @@ public class SlotService {
 		int availableCount = requestDto.getAvailableCount();
 		int totalCount = requestDto.getTotalCount();
 		
-		validateDateTime(startDate, popup, endDate, startTime, endTime);
+		validateDateTime(requestDto, popup);
 		
 		List<Slot> slotList = new ArrayList<>();
 		
@@ -80,17 +79,14 @@ public class SlotService {
 	 * @return 팝업
 	 */
 	private Popup validatePopup(Long popupId, Long hostId) {
-		Optional<Popup> optionalPopup = popupRepository.findByIdAndHostId(popupId, hostId);
+		Popup popup = popupRepository.findByIdAndHostId(popupId, hostId)
+			.orElseThrow(() -> new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN));
 		
-		if (optionalPopup.isEmpty()) {
-			// 팝업이 존재하지 않거나 권한이 없는 경우
-			throw new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN);
-		} else if (!optionalPopup.get().getApprovalStatus().equals(ApprovalStatus.APPROVAL)) {
-			// 승인되지 않은 팝업인 경우
+		if (popup.getApprovalStatus().equals(ApprovalStatus.APPROVAL)) {
 			throw new CustomException(ErrorType.POPUP_NOT_APPROVAL);
 		}
 		
-		return optionalPopup.get();
+		return popup;
 	}
 	
 	/**
@@ -108,15 +104,14 @@ public class SlotService {
 	/**
 	 * 예약 가능한 날짜, 시간 확인
 	 *
-	 * @param startDate 시작 날짜
+	 * @param requestDto 슬롯 생성 요청 DTO
 	 * @param popup 팝업
-	 * @param endDate 종료 날짜
-	 * @param startTime 시작 시간
-	 * @param endTime 종료 시간
 	 */
-	private void validateDateTime(LocalDate startDate, Popup popup, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
-		if (startDate.isBefore(ChronoLocalDate.from(popup.getStartDate())) || endDate.isAfter(ChronoLocalDate.from(popup.getEndDate()))
-			|| startDate.isAfter(endDate) || startTime.isAfter(endTime)) {
+	private void validateDateTime(SlotRequestDto requestDto, Popup popup) {
+		if (requestDto.getStartDate().isBefore(ChronoLocalDate.from(popup.getStartDate()))
+			|| requestDto.getEndDate().isAfter(ChronoLocalDate.from(popup.getEndDate()))
+			|| requestDto.getStartDate().isAfter(requestDto.getEndDate())
+			|| requestDto.getStartTime().isAfter(requestDto.getEndTime())) {
 			throw new CustomException(ErrorType.INVALID_DATE_TIME);
 		}
 	}

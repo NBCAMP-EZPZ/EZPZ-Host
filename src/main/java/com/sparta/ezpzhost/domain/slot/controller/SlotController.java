@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.ezpzhost.common.dto.CommonResponse;
+import com.sparta.ezpzhost.common.security.UserDetailsImpl;
 import com.sparta.ezpzhost.domain.slot.dto.SlotRequestDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotResponseDto;
 import com.sparta.ezpzhost.domain.slot.service.SlotService;
@@ -36,10 +37,10 @@ public class SlotController {
 	@PostMapping
 	public ResponseEntity<CommonResponse<?>> createSlot(
 		@PathVariable Long popupId,
-		@Valid @RequestBody SlotRequestDto requestDto
+		@Valid @RequestBody SlotRequestDto requestDto,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		
-		List<SlotResponseDto> slotList = slotService.createSlot(popupId, requestDto, userDetails.getUser());
+		List<SlotResponseDto> slotList = slotService.createSlot(popupId, requestDto, userDetails.getHost());
 
 		return getResponseEntity(slotList, "예약 정보 등록 성공");
 	}
