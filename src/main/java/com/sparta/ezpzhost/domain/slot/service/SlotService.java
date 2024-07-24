@@ -6,6 +6,10 @@ import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,10 +18,11 @@ import com.sparta.ezpzhost.common.exception.ErrorType;
 import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
 import com.sparta.ezpzhost.domain.popup.enums.ApprovalStatus;
-import com.sparta.ezpzhost.domain.popup.repository.PopupRepository;
+import com.sparta.ezpzhost.domain.popup.repository.popup.PopupRepository;
 import com.sparta.ezpzhost.domain.slot.dto.SlotCreateDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotRequestDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotResponseDto;
+import com.sparta.ezpzhost.domain.slot.dto.SlotResponseListDto;
 import com.sparta.ezpzhost.domain.slot.entity.Slot;
 import com.sparta.ezpzhost.domain.slot.repository.SlotRepository;
 
@@ -67,6 +72,25 @@ public class SlotService {
 		return SlotResponseDto.listOf(slotList);
 	}
 	
+	/**
+	 * 예약 정보 슬롯 전체 조회
+	 *
+	 * @param popupId 팝업 ID
+	 * @param page 페이지 번호
+	 * @param host 로그인 사용자 정보
+	 * @return 슬롯 리스트
+	 */
+	public Page<SlotResponseListDto> findSlots(Long popupId, int page, Host host) {
+		validatePopup(popupId, host.getId());
+		
+		int validPage = Math.max(page - 1, 0);
+		Pageable pageable = PageRequest.of(validPage, 10, Sort.by("id"));
+		Page<Slot> slotList = slotRepository.findByPopupId(popupId, pageable);
+		
+		validatePage(validPage, slotList);
+		
+		return slotList.map(SlotResponseListDto::of);
+	}
 	
 	/* UTIL */
 	
@@ -82,7 +106,7 @@ public class SlotService {
 		Popup popup = popupRepository.findByIdAndHostId(popupId, hostId)
 			.orElseThrow(() -> new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN));
 		
-		if (popup.getApprovalStatus().equals(ApprovalStatus.APPROVAL)) {
+		if (!popup.getApprovalStatus().equals(ApprovalStatus.APPROVED)) {
 			throw new CustomException(ErrorType.POPUP_NOT_APPROVAL);
 		}
 		
@@ -113,6 +137,22 @@ public class SlotService {
 			|| requestDto.getStartDate().isAfter(requestDto.getEndDate())
 			|| requestDto.getStartTime().isAfter(requestDto.getEndTime())) {
 			throw new CustomException(ErrorType.INVALID_DATE_TIME);
+		}
+	}
+	
+	/**
+	 * 페이지 유효성 확인
+	 *
+	 * @param page
+	 * @param pageList
+	 */
+	private static void validatePage(int page, Page<?> pageList) {
+		if(pageList.getTotalElements() == 0) {
+			throw new CustomException(ErrorType.NOT_FOUND_PAGE);
+		}
+		
+		if(page + 1> pageList.getTotalPages()) {
+			throw new CustomException(ErrorType.INVALID_PAGE);
 		}
 	}
 }

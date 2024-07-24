@@ -37,6 +37,10 @@ public enum ErrorType {
     INVALID_DATE_TIME(HttpStatus.BAD_REQUEST, "예약을 등록할 수 있는 날짜, 시간이 아닙니다."),
     SLOT_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 예약 슬롯이 존재합니다."),
 
+    // Page
+    INVALID_PAGE(HttpStatus.BAD_REQUEST, "페이지 번호가 올바르지 않습니다."),
+    NOT_FOUND_PAGE(HttpStatus.NOT_FOUND, "페이지가 존재하지 않습니다.")
+    
     //
 
     ;
