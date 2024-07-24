@@ -110,6 +110,10 @@ public class SlotService {
 		
 		List<Reservation> reservationList = reservationRepository.findBySlotIdAndReservationStatus(slotId, ReservationStatus.READY);
 		
+		if (reservationList.isEmpty()) {
+			throw new CustomException(ErrorType.RESERVATION_NOT_FOUND);
+		}
+		
 		return ReservationListDto.listOf(reservationList);
 	}
 	
