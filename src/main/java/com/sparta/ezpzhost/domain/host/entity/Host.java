@@ -38,5 +38,4 @@ public class Host extends Timestamped {
     public static Host of(SignupRequestDto dto, String encodedPassword) {
         return new Host(dto, encodedPassword);
     }
-
 }
