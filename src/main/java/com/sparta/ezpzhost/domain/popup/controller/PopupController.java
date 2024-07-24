@@ -1,5 +1,6 @@
 package com.sparta.ezpzhost.domain.popup.controller;
 
+import com.sparta.ezpzhost.common.security.UserDetailsImpl;
 import com.sparta.ezpzhost.common.util.PageUtil;
 import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.popup.dto.PopupRequestDto;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import static com.sparta.ezpzhost.common.util.ControllerUtil.getResponseEntity;
@@ -27,10 +29,9 @@ public class PopupController {
      */
     @PostMapping("/v1/popups")
     public ResponseEntity<?> createPopup(
-            @ModelAttribute @Valid PopupRequestDto requestDto) {
-        // todo : securiry 구현 완료 시 변경
-        Host host = new Host(1L);
-        PopupResponseDto responseDto = popupService.createPopup(requestDto, host);
+            @ModelAttribute @Valid PopupRequestDto requestDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        PopupResponseDto responseDto = popupService.createPopup(requestDto, userDetails.getHost());
         return getResponseEntity(responseDto, "팝업스토어 등록 성공");
     }
 
@@ -49,10 +50,8 @@ public class PopupController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "all") String approvalStatus,
-            @RequestParam(defaultValue = "all") String popupStatus) {
-        // todo : securiry 구현 완료 시 변경
-        Host host = new Host(1L);
-
+            @RequestParam(defaultValue = "all") String popupStatus,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         PageUtil pageUtil = PageUtil.builder()
                 .page(page)
                 .size(size)
@@ -61,7 +60,7 @@ public class PopupController {
                 .secondStatus(popupStatus)
                 .build();
 
-        Page<?> popupList = popupService.findAllPopupsByStatus(host, pageUtil);
+        Page<?> popupList = popupService.findAllPopupsByStatus(userDetails.getHost(), pageUtil);
         return getResponseEntity(popupList, "호스트의 팝업 목록 조회 성공");
     }
 
@@ -71,10 +70,10 @@ public class PopupController {
      * @return 팝업 상세정보
      */
     @GetMapping("/v1/popups/{popupId}")
-    public ResponseEntity<?> findPopup(@PathVariable Long popupId) {
-        // todo : securiry 구현 완료 시 변경
-        Host host = new Host(1L);
-        PopupResponseDto responseDto = popupService.findPopup(popupId, host);
+    public ResponseEntity<?> findPopup(
+            @PathVariable Long popupId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        PopupResponseDto responseDto = popupService.findPopup(popupId, userDetails.getHost());
         return getResponseEntity(responseDto, "핍업스토어 상세보기 조회 성공");
     }
 
@@ -87,10 +86,9 @@ public class PopupController {
     @PutMapping("/v1/popups/{popupId}")
     public ResponseEntity<?> updatePopup(
             @PathVariable Long popupId,
-            @ModelAttribute @Valid PopupRequestDto requestDto) {
-        // todo : securiry 구현 완료 시 변경
-        Host host = new Host(1L);
-        PopupResponseDto responseDto = popupService.updatePopup(popupId, requestDto, host);
+            @ModelAttribute @Valid PopupRequestDto requestDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        PopupResponseDto responseDto = popupService.updatePopup(popupId, requestDto, userDetails.getHost());
         return getResponseEntity(responseDto, "팝업스토어 수정 성공");
     }
 
@@ -101,10 +99,9 @@ public class PopupController {
      */
     @PatchMapping("/v1/popups/{popupId}")
     public ResponseEntity<?> cancelPopup(
-            @PathVariable Long popupId) {
-        // todo : securiry 구현 완료 시 변경
-        Host host = new Host(1L);
-        popupService.cancelPopup(popupId, host);
+            @PathVariable Long popupId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        popupService.cancelPopup(popupId, userDetails.getHost());
         return getResponseEntity("팝업스토어 수정 성공");
     }
 }
