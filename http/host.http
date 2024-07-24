@@ -1,0 +1,34 @@
+### 호스트 회원가입
+POST http://localhost:8081/api/v1/signup
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}",
+  "email": "{{email}}",
+  "companyName": "{{companyName}}",
+  "businessNumber": "{{businessNumber}}"
+}
+
+### 호스트 로그인
+POST http://localhost:8081/api/v1/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+> {%
+    client.global.set("Authorization", response.headers.valueOf("Authorization"));
+    client.global.set("refresh_token", response.headers.valueOf("Set-Cookie").split(";")[0].split("=")[1]);
+    client.log("Authorization : " + client.global.get("Authorization"))
+    client.log("refresh_token : " + client.global.get("refresh_token"))
+
+    client.global.set("Cookie", response.headers.valueOf("Set-Cookie"));
+%}
+
+### 호스트 로그아웃
+POST http://localhost:8081/api/v1/logout
+Authorization: {{Authorization}}
+Cookie: {{Cookie}}
