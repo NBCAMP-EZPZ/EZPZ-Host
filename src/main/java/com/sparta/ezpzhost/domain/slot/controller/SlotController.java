@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.ezpzhost.common.dto.CommonResponse;
 import com.sparta.ezpzhost.common.security.UserDetailsImpl;
+import com.sparta.ezpzhost.domain.reservation.dto.ReservationListDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotRequestDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotResponseDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotResponseListDto;
@@ -67,6 +68,25 @@ public class SlotController {
 		Page<SlotResponseListDto> slotList = slotService.findSlots(popupId, page, userDetails.getHost());
 
 		return getResponseEntity(slotList, "예약 정보 조회 성공");
+	}
+	
+	/**
+	 * 예약 정보 상세 조회
+	 *
+	 * @param popupId
+	 * @param slotId
+	 * @param userDetails
+	 * @return
+	 */
+	@GetMapping("/{slotId}")
+	public ResponseEntity<CommonResponse<?>> findSlot(
+		@PathVariable Long popupId,
+		@PathVariable Long slotId,
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		
+		List<ReservationListDto> reservationList = slotService.findSlot(popupId, slotId, userDetails.getHost());
+
+		return getResponseEntity(reservationList, "예약 정보 상세 조회 성공");
 	}
 	
 }

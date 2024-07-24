@@ -19,6 +19,10 @@ import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
 import com.sparta.ezpzhost.domain.popup.enums.ApprovalStatus;
 import com.sparta.ezpzhost.domain.popup.repository.popup.PopupRepository;
+import com.sparta.ezpzhost.domain.reservation.dto.ReservationListDto;
+import com.sparta.ezpzhost.domain.reservation.entity.Reservation;
+import com.sparta.ezpzhost.domain.reservation.enums.ReservationStatus;
+import com.sparta.ezpzhost.domain.reservation.repository.ReservationRepository;
 import com.sparta.ezpzhost.domain.slot.dto.SlotCreateDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotRequestDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotResponseDto;
@@ -34,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 public class SlotService {
 	private final SlotRepository slotRepository;
 	private final PopupRepository popupRepository;
+	private final ReservationRepository reservationRepository;
 	
 	/**
 	 * 예약 정보 슬롯 생성
@@ -91,6 +96,24 @@ public class SlotService {
 		
 		return slotList.map(SlotResponseListDto::of);
 	}
+	
+	/**
+	 * 예약 정보 상세 조회
+	 *
+	 * @param popupId 팝업 ID
+	 * @param slotId 슬롯 ID
+	 * @param host 로그인 사용자 정보
+	 * @return 예약 정보 리스트
+	 */
+	public List<ReservationListDto> findSlot(Long popupId, Long slotId, Host host) {
+		validatePopup(popupId, host.getId());
+		
+		List<Reservation> reservationList = reservationRepository.findBySlotIdAndReservationStatus(slotId, ReservationStatus.READY);
+		
+		return ReservationListDto.listOf(reservationList);
+	}
+	
+	
 	
 	/* UTIL */
 	
