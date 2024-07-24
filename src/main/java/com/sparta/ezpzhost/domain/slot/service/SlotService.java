@@ -1,5 +1,7 @@
 package com.sparta.ezpzhost.domain.slot.service;
 
+import static com.sparta.ezpzhost.common.util.PageUtil.validatePageableWithPage;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.chrono.ChronoLocalDate;
@@ -7,9 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,18 +81,14 @@ public class SlotService {
 	 * 예약 정보 슬롯 전체 조회
 	 *
 	 * @param popupId 팝업 ID
-	 * @param page 페이지 번호
+	 * @param pageable 페이지 정보
 	 * @param host 로그인 사용자 정보
 	 * @return 슬롯 리스트
 	 */
-	public Page<SlotResponseListDto> findSlots(Long popupId, int page, Host host) {
+	public Page<SlotResponseListDto> findSlots(Long popupId, Pageable pageable, Host host) {
 		validatePopup(popupId, host.getId());
-		
-		int validPage = Math.max(page - 1, 0);
-		Pageable pageable = PageRequest.of(validPage, 10, Sort.by("id"));
 		Page<Slot> slotList = slotRepository.findByPopupId(popupId, pageable);
-		
-		validatePage(validPage, slotList);
+		validatePageableWithPage(pageable, slotList);
 		
 		return slotList.map(SlotResponseListDto::of);
 	}

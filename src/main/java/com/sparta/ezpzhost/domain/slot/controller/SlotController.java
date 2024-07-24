@@ -5,6 +5,7 @@ import static com.sparta.ezpzhost.common.util.ControllerUtil.getResponseEntity;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.ezpzhost.common.dto.CommonResponse;
@@ -55,17 +55,17 @@ public class SlotController {
 	 * 예약 정보 슬롯 전체 조회
 	 *
 	 * @param popupId 팝업 ID
-	 * @param page 페이지 번호
+	 * @param pageable 페이지 정보
 	 * @param userDetails 로그인 사용자 정보
 	 * @return 슬롯 리스트
 	 */
 	@GetMapping
 	public ResponseEntity<CommonResponse<?>> findSlots(
 		@PathVariable Long popupId,
-		@RequestParam(defaultValue = "1") int page,
+		Pageable pageable,
 		@AuthenticationPrincipal UserDetailsImpl userDetails) {
 		
-		Page<SlotResponseListDto> slotList = slotService.findSlots(popupId, page, userDetails.getHost());
+		Page<SlotResponseListDto> slotList = slotService.findSlots(popupId, pageable, userDetails.getHost());
 
 		return getResponseEntity(slotList, "예약 정보 조회 성공");
 	}
