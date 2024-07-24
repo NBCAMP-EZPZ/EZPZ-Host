@@ -59,11 +59,8 @@ public class PopupService {
      * @return 팝업 목록
      */
     public Page<?> findAllPopupsByStatus(Host host, PageUtil pageUtil) {
-        // todo : Host 구현 완료 시 수정
-        String companyName = "companyName";
-
         return popupRepository.findAllPopupsByStatus(host, pageUtil)
-                .map(p -> PopupPageResponseDto.of(p.getId(), p.getName(), companyName));
+                .map(p -> PopupPageResponseDto.of(p.getId(), p.getName(), host.getCompanyName()));
     }
 
     /**

@@ -20,7 +20,7 @@ import java.util.Objects;
 import static com.sparta.ezpzhost.domain.popup.entity.QPopup.popup;
 
 @RequiredArgsConstructor
-public class PopupRepositoryQueryImpl implements PopupRepositoryQuery {
+public class PopupRepositoryCustomImpl implements PopupRepositoryCustom {
 
     private final JPAQueryFactory jpaQueryFactory;
 

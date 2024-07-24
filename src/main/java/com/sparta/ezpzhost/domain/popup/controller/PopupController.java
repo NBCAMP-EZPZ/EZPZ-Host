@@ -102,6 +102,6 @@ public class PopupController {
             @PathVariable Long popupId,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         popupService.cancelPopup(popupId, userDetails.getHost());
-        return getResponseEntity("팝업스토어 수정 성공");
+        return getResponseEntity("팝업스토어 취소 성공");
     }
 }

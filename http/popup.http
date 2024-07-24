@@ -1,8 +1,10 @@
 ## Variables
-@popupId = 28
+@popupId = 29
 
 ### 팝업 등록
 POST http://localhost:8081/api/v1/popups
+Authorization: {{Authorization}}
+Cookie: {{Cookie}}
 Content-Type: multipart/form-data; boundary=boundary
 
 --boundary
@@ -56,12 +58,18 @@ Content-Type: image/png
 ### 승인 상태 : approvalStatus=(reviewing, approved, rejected)
 ### 팝업 상태 : popupStatus=(scheduled, in_progress, completed, canceled)
 GET http://localhost:8081/api/v1/popups?approvalStatus=reviewing&popupStatus=scheduled
+Authorization: {{Authorization}}
+Cookie: {{Cookie}}
 
 ### 팝업 상세 조회
 GET http://localhost:8081/api/v1/popups/{{popupId}}
+Authorization: {{Authorization}}
+Cookie: {{Cookie}}
 
 ### 팝업 수정
 PUT http://localhost:8081/api/v1/popups/{{popupId}}
+Authorization: {{Authorization}}
+Cookie: {{Cookie}}
 Content-Type: multipart/form-data; boundary=boundary
 
 --boundary
@@ -113,3 +121,5 @@ Content-Type: image/png
 
 ### 팝업 취소
 PATCH http://localhost:8081/api/v1/popups/{{popupId}}
+Authorization: {{Authorization}}
+Cookie: {{Cookie}}

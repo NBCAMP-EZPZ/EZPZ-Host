@@ -24,9 +24,11 @@ Content-Type: application/json
     client.global.set("refresh_token", response.headers.valueOf("Set-Cookie").split(";")[0].split("=")[1]);
     client.log("Authorization : " + client.global.get("Authorization"))
     client.log("refresh_token : " + client.global.get("refresh_token"))
+
+    client.global.set("Cookie", response.headers.valueOf("Set-Cookie"));
 %}
 
 ### 호스트 로그아웃
 POST http://localhost:8081/api/v1/logout
 Authorization: {{Authorization}}
-refresh_token: {{refresh_token}}
+Cookie: {{Cookie}}
