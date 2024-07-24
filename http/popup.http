@@ -1,5 +1,5 @@
 ## Variables
-@popupId = 29
+@popupId = 30
 
 ### 팝업 등록
 POST http://localhost:8081/api/v1/popups

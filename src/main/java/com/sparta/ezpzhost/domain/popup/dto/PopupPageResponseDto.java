@@ -1,21 +1,24 @@
 package com.sparta.ezpzhost.domain.popup.dto;
 
+import com.sparta.ezpzhost.domain.popup.entity.Popup;
 import lombok.Getter;
 
 @Getter
 public class PopupPageResponseDto {
 
-    private Long popupId;
-    private String name;
-    private String companyName;
+    private final Long popupId;
+    private final String name;
+    private final int likeCount;
+    private final String companyName;
 
-    private PopupPageResponseDto(Long popupId, String name, String companyName) {
-        this.popupId = popupId;
-        this.name = name;
-        this.companyName = companyName;
+    public PopupPageResponseDto(Popup popup) {
+        this.popupId = popup.getId();
+        this.name = popup.getName();
+        this.likeCount = popup.getLikeCount();
+        this.companyName = popup.getHost().getCompanyName();
     }
 
-    public static PopupPageResponseDto of(Long popupId, String name, String companyName) {
-        return new PopupPageResponseDto(popupId, name, companyName);
+    public static PopupPageResponseDto of(Popup popup) {
+        return new PopupPageResponseDto(popup);
     }
 }

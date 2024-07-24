@@ -58,36 +58,34 @@ public class Popup extends Timestamped {
     @Enumerated(EnumType.STRING)
     private ApprovalStatus approvalStatus;
 
+    @Column(name = "like_count")
+    private int likeCount;
+
     @Column(name = "start_date", nullable = false)
     private LocalDateTime startDate;
 
     @Column(name = "end_date", nullable = false)
     private LocalDateTime endDate;
 
-    private Popup(Host host, String name, String description, String address, String managerName, String phoneNumber, LocalDateTime startDate, LocalDateTime endDate, String thumbnailUrl, String thumbnailName, PopupStatus popupStatus, ApprovalStatus approvalStatus) {
+    private Popup(Host host, PopupRequestDto requestDto, ImageResponseDto thumbnail, PopupStatus popupStatus, ApprovalStatus approvalStatus) {
         this.host = host;
-        this.name = name;
-        this.description = description;
-        this.address = address;
-        this.managerName = managerName;
-        this.phoneNumber = phoneNumber;
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.name = requestDto.getName();
+        this.description = requestDto.getDescription();
+        this.address = requestDto.getAddress();
+        this.managerName = requestDto.getManagerName();
+        this.phoneNumber = requestDto.getPhoneNumber();
+        this.likeCount = 0;
+        this.startDate = requestDto.getStartDate();
+        this.endDate = requestDto.getEndDate();
 
-        this.thumbnailUrl = thumbnailUrl;
-        this.thumbnailName = thumbnailName;
+        this.thumbnailUrl = thumbnail.getUrl();
+        this.thumbnailName = thumbnail.getName();
         this.popupStatus = popupStatus;
         this.approvalStatus = approvalStatus;
     }
 
     public static Popup of(Host host, PopupRequestDto requestDto, ImageResponseDto thumbnail, PopupStatus popupStatus, ApprovalStatus approvalStatus) {
-        return new Popup(
-                host,
-                requestDto.getName(), requestDto.getDescription(), requestDto.getAddress(),
-                requestDto.getManagerName(), requestDto.getPhoneNumber(),
-                requestDto.getStartDate(), requestDto.getEndDate(),
-                thumbnail.getUrl(), thumbnail.getName(), popupStatus, approvalStatus
-        );
+        return new Popup(host, requestDto, thumbnail, popupStatus, approvalStatus);
     }
 
     /**

@@ -18,6 +18,7 @@ public class PopupResponseDto {
     private final String phoneNumber;
     private final String approvalStatus;
     private final String popupStatus;
+    private final int likeCount;
     private final LocalDateTime startDate;
     private final LocalDateTime endDate;
     private final List<String> images;
@@ -32,6 +33,7 @@ public class PopupResponseDto {
         this.phoneNumber = popup.getPhoneNumber();
         this.approvalStatus = popup.getApprovalStatus().toString();
         this.popupStatus = popup.getPopupStatus().toString();
+        this.likeCount = popup.getLikeCount();
         this.startDate = popup.getStartDate();
         this.endDate = popup.getEndDate();
         this.images = images;
