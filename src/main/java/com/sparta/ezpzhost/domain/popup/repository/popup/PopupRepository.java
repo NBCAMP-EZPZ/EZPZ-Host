@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface PopupRepository extends JpaRepository<Popup, Long>, PopupRepositoryCustom {
     Optional<Popup> findByIdAndHostId(Long popupId, Long hostId);
+
+    boolean existsByName(String name);
 }

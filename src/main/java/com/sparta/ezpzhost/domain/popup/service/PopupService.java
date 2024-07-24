@@ -38,6 +38,11 @@ public class PopupService {
     @Transactional
     public PopupResponseDto createPopup(PopupRequestDto requestDto, Host host) {
 
+        // 팝업명 중복 체크
+        if (popupRepository.existsByName(requestDto.getName())) {
+            throw new CustomException(ErrorType.DUPLICATED_POPUP_NAME);
+        }
+
         // 썸네일 업로드
         ImageResponseDto thumbnail = imageService.uploadThumbnail(requestDto.getThumbnail());
 
