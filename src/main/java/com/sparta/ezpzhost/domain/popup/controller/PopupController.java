@@ -2,13 +2,14 @@ package com.sparta.ezpzhost.domain.popup.controller;
 
 import com.sparta.ezpzhost.common.security.UserDetailsImpl;
 import com.sparta.ezpzhost.common.util.PageUtil;
-import com.sparta.ezpzhost.domain.host.entity.Host;
+import com.sparta.ezpzhost.domain.popup.dto.PopupCondition;
 import com.sparta.ezpzhost.domain.popup.dto.PopupRequestDto;
 import com.sparta.ezpzhost.domain.popup.dto.PopupResponseDto;
 import com.sparta.ezpzhost.domain.popup.service.PopupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -37,30 +38,21 @@ public class PopupController {
 
     /**
      * 상태별 팝업 목록 조회
-     * @param page 페이지
-     * @param size 개수
-     * @param sortBy 정렬 기준
+     * @param pageable 페이징
      * @param approvalStatus 승인 상태
      * @param popupStatus 팝업 상태
      * @return 팝업 목록
      */
     @GetMapping("/v1/popups")
     public ResponseEntity<?> findAllPopupsByStatus(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
+            Pageable pageable,
             @RequestParam(defaultValue = "all") String approvalStatus,
             @RequestParam(defaultValue = "all") String popupStatus,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        PageUtil pageUtil = PageUtil.builder()
-                .page(page)
-                .size(size)
-                .sortBy(sortBy)
-                .firstStatus(approvalStatus)
-                .secondStatus(popupStatus)
-                .build();
 
-        Page<?> popupList = popupService.findAllPopupsByStatus(userDetails.getHost(), pageUtil);
+        PopupCondition cond = PopupCondition.of(approvalStatus, popupStatus);
+
+        Page<?> popupList = popupService.findAllPopupsByStatus(userDetails.getHost(), pageable, cond);
         return getResponseEntity(popupList, "호스트의 팝업 목록 조회 성공");
     }
 

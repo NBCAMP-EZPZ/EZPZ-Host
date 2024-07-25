@@ -1,0 +1,84 @@
+## Variables
+@popupId = 31
+@itemId = 3
+
+### 굿즈 상품 등록
+POST http://localhost:8081/api/v1/popups/{{popupId}}/items
+Authorization: {{Authorization}}
+Cookie: {{Cookie}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="name";
+
+name43
+
+--boundary
+Content-Disposition: form-data; name="description";
+
+description
+
+--boundary
+Content-Disposition: form-data; name="price";
+
+1000
+
+--boundary
+Content-Disposition: form-data; name="stock";
+
+30
+
+--boundary
+Content-Disposition: form-data; name="image"; filename="image.jpeg";
+Content-Type: image/png
+
+< images/image.png
+
+### 팝업 및 상태별 굿즈 상품 목록 조회
+### 팝업 ID : popupId=30
+### 상품 상태 : ItemStatus=(before_sale, sale, sale_end, sold_out)
+GET http://localhost:8081/api/v1/items?itemStatus=sale&popupId=30
+Authorization: {{Authorization}}
+Cookie: {{Cookie}}
+
+### 상품 상세 조회
+GET http://localhost:8081/api/v1/items/{{itemId}}
+Authorization: {{Authorization}}
+Cookie: {{Cookie}}
+
+### 굿즈 상품 수정
+PUT http://localhost:8081/api/v1/items/{{itemId}}
+Authorization: {{Authorization}}
+Cookie: {{Cookie}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="name";
+
+update name123
+
+--boundary
+Content-Disposition: form-data; name="description";
+
+update description
+
+--boundary
+Content-Disposition: form-data; name="price";
+
+99999
+
+--boundary
+Content-Disposition: form-data; name="stock";
+
+50
+
+--boundary
+Content-Disposition: form-data; name="image"; filename="item/e9be3a7e471940009898d7220b1f617d.jpeg";
+Content-Type: image/png
+
+< images/image.png
+
+### 상품 상태 변경 (before_sale, sale, sale_end, sold_out)
+PATCH http://localhost:8081/api/v1/items/{{itemId}}?itemStatus=sale
+Authorization: {{Authorization}}
+Cookie: {{Cookie}}

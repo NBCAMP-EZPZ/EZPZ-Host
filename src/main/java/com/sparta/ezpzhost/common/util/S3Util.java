@@ -1,4 +1,4 @@
-package com.sparta.ezpzhost.domain.popup.util;
+package com.sparta.ezpzhost.common.util;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.internal.Mimetypes;

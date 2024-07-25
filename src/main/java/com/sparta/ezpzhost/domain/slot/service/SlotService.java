@@ -39,7 +39,7 @@ public class SlotService {
 	private final SlotRepository slotRepository;
 	private final PopupRepository popupRepository;
 	private final ReservationRepository reservationRepository;
-	
+
 	/**
 	 * 예약 정보 슬롯 생성
 	 *
@@ -89,10 +89,10 @@ public class SlotService {
 		validatePopup(popupId, host.getId());
 		Page<Slot> slotList = slotRepository.findByPopupId(popupId, pageable);
 		validatePageableWithPage(pageable, slotList);
-		
+
 		return slotList.map(SlotResponseListDto::of);
 	}
-	
+
 	/**
 	 * 예약 정보 상세 조회
 	 *
@@ -103,18 +103,18 @@ public class SlotService {
 	 */
 	public List<ReservationListDto> findSlot(Long popupId, Long slotId, Host host) {
 		validatePopup(popupId, host.getId());
-		
+
 		List<Reservation> reservationList = reservationRepository.findBySlotIdAndReservationStatus(slotId, ReservationStatus.READY);
-		
+
 		if (reservationList.isEmpty()) {
 			throw new CustomException(ErrorType.RESERVATION_NOT_FOUND);
 		}
-		
+
 		return ReservationListDto.listOf(reservationList);
 	}
-	
-	
-	
+
+
+
 	/* UTIL */
 	
 	
@@ -162,7 +162,7 @@ public class SlotService {
 			throw new CustomException(ErrorType.INVALID_DATE_TIME);
 		}
 	}
-	
+
 	/**
 	 * 페이지 유효성 확인
 	 *
@@ -173,7 +173,7 @@ public class SlotService {
 		if(pageList.getTotalElements() == 0) {
 			throw new CustomException(ErrorType.NOT_FOUND_PAGE);
 		}
-		
+
 		if(page + 1> pageList.getTotalPages()) {
 			throw new CustomException(ErrorType.INVALID_PAGE);
 		}
