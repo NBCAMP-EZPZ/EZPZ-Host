@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -22,10 +23,10 @@ public class Popup extends Timestamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "popup_id", nullable = false, unique = true)
+    @Column(name = "popup_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "host_id", nullable = false)
     private Host host;
 
@@ -67,6 +68,9 @@ public class Popup extends Timestamped {
     @Column(name = "end_date", nullable = false)
     private LocalDateTime endDate;
 
+    @OneToMany(mappedBy = "popup")
+    private List<Image> imageList;
+
     private Popup(Host host, PopupRequestDto requestDto, ImageResponseDto thumbnail, PopupStatus popupStatus, ApprovalStatus approvalStatus) {
         this.host = host;
         this.name = requestDto.getName();
@@ -86,6 +90,18 @@ public class Popup extends Timestamped {
 
     public static Popup of(Host host, PopupRequestDto requestDto, ImageResponseDto thumbnail, PopupStatus popupStatus, ApprovalStatus approvalStatus) {
         return new Popup(host, requestDto, thumbnail, popupStatus, approvalStatus);
+    }
+
+    /**
+     * 수정 가능 여부 확인
+     */
+    public void checkPossibleUpdateStatus() {
+        if (this.approvalStatus.equals(ApprovalStatus.REJECTED)) {
+            throw new CustomException(ErrorType.POPUP_NOT_APPROVAL);
+        }else if (this.popupStatus.equals(PopupStatus.CANCELED) ||
+                this.popupStatus.equals(PopupStatus.COMPLETED)) {
+            throw new CustomException(ErrorType.POPUP_STATUS_IMPASSIBLE);
+        }
     }
 
     /**
@@ -126,5 +142,15 @@ public class Popup extends Timestamped {
     public void cancelPopup() {
         this.popupStatus = PopupStatus.CANCELED;
         this.approvalStatus = ApprovalStatus.REJECTED;
+    }
+
+    /**
+     * 상품 등록 가능 여부 확인
+     */
+    public void checkItemCanBeRegistered() {
+        if (this.approvalStatus.equals(ApprovalStatus.REVIEWING) ||
+        this.approvalStatus.equals(ApprovalStatus.REJECTED)) {
+            throw new CustomException(ErrorType.ITEM_REGISTRATION_IMPOSSIBLE);
+        }
     }
 }
