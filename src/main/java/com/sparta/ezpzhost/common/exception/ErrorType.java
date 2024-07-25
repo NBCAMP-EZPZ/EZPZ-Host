@@ -44,6 +44,7 @@ public enum ErrorType {
     IMAGE_COUNT_EXCEEDED(HttpStatus.PAYLOAD_TOO_LARGE, "추가 사진은 최소 1개, 최대 3개까지 등록 가능합니다"),
 
     // Order
+    INVALID_ORDER_SORT_CONDITION(HttpStatus.BAD_REQUEST, "유효하지 않은 주문 정렬 조건입니다."),
 
     // Item
     DUPLICATED_ITEM_NAME(HttpStatus.BAD_REQUEST, "이미 존재하는 굿즈명입니다."),
