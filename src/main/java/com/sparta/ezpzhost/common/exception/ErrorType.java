@@ -1,11 +1,11 @@
 package com.sparta.ezpzhost.common.exception;
 
+import static com.sparta.ezpzhost.common.resolver.CustomPageableHandlerMethodArgumentResolver.MAX_PAGE_SIZE;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-
-import static com.sparta.ezpzhost.common.resolver.CustomPageableHandlerMethodArgumentResolver.MAX_PAGE_SIZE;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Getter
 @AllArgsConstructor
@@ -45,6 +45,7 @@ public enum ErrorType {
 
     // Order
     INVALID_ORDER_SORT_CONDITION(HttpStatus.BAD_REQUEST, "유효하지 않은 주문 정렬 조건입니다."),
+    ORDER_NOT_FOUND_OR_ACCESS_DENIED(HttpStatus.BAD_REQUEST, "해당 주문이 존재하지 않거나, 상품에 대한 권한이 없습니다."),
 
     // Item
     DUPLICATED_ITEM_NAME(HttpStatus.BAD_REQUEST, "이미 존재하는 굿즈명입니다."),
@@ -56,12 +57,12 @@ public enum ErrorType {
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "예약이 존재하지 않습니다."),
     INVALID_DATE_TIME(HttpStatus.BAD_REQUEST, "예약을 등록할 수 있는 날짜, 시간이 아닙니다."),
     SLOT_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 예약 슬롯이 존재합니다."),
-    
+
 
     // Page
     INVALID_PAGE(HttpStatus.BAD_REQUEST, "페이지 번호가 올바르지 않습니다."),
-    NOT_FOUND_PAGE(HttpStatus.NOT_FOUND, "페이지가 존재하지 않습니다.")
-    
+    NOT_FOUND_PAGE(HttpStatus.NOT_FOUND, "페이지가 존재하지 않습니다."),
+
     //
 
     ;
