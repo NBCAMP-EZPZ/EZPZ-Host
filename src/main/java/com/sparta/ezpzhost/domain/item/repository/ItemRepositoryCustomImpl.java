@@ -1,11 +1,8 @@
 package com.sparta.ezpzhost.domain.item.repository;
 
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Wildcard;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.sparta.ezpzhost.common.util.PageUtil;
 import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.item.dto.ItemCondition;
 import com.sparta.ezpzhost.domain.item.entity.Item;
@@ -27,35 +24,32 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 
     @Override
     public Page<Item> findAllItemsByPopupAndStatus(Host host, Pageable pageable, ItemCondition cond) {
-        JPAQuery<Item> query = findAllItemsByPopupAndStatusQuery(item, host, cond)
+        // 데이터 조회 쿼리
+        List<Item> items = jpaQueryFactory
+                .select(item)
+                .from(item)
+                .where(
+                        hostEq(host),
+                        popupIdEq(cond.getPopupId()),
+                        itemStatusEq(cond.getItemStatus())
+                )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(item.createdAt.desc());
+                .orderBy(item.createdAt.desc())
+                .fetch();
 
-        List<Item> items = query.fetch();
-        Long totalSize = findAllItemsByPopupAndStatusCount(host, cond).fetch().get(0);
+        // 카운트 쿼리
+        Long totalSize = jpaQueryFactory
+                .select(Wildcard.count)
+                .from(item)
+                .where(
+                        hostEq(host),
+                        popupIdEq(cond.getPopupId()),
+                        itemStatusEq(cond.getItemStatus())
+                )
+                .fetchOne();
 
         return PageableExecutionUtils.getPage(items, pageable, () -> totalSize);
-    }
-
-    private <T> JPAQuery<T> findAllItemsByPopupAndStatusQuery(Expression<T> expr, Host host, ItemCondition cond) {
-        return jpaQueryFactory.select(expr)
-                .from(item)
-                .where(
-                        hostEq(host),
-                        popupIdEq(cond.getPopupId()),
-                        itemStatusEq(cond.getItemStatus())
-                );
-    }
-
-    private JPAQuery<Long> findAllItemsByPopupAndStatusCount(Host host, ItemCondition cond) {
-        return jpaQueryFactory.select(Wildcard.count)
-                .from(item)
-                .where(
-                        hostEq(host),
-                        popupIdEq(cond.getPopupId()),
-                        itemStatusEq(cond.getItemStatus())
-                );
     }
 
     // 조건 : 호스트

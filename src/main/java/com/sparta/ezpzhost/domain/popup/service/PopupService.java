@@ -1,8 +1,8 @@
 package com.sparta.ezpzhost.domain.popup.service;
 
-import com.sparta.ezpzhost.common.util.PageUtil;
 import com.sparta.ezpzhost.common.exception.CustomException;
 import com.sparta.ezpzhost.common.exception.ErrorType;
+import com.sparta.ezpzhost.common.util.PageUtil;
 import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.popup.dto.*;
 import com.sparta.ezpzhost.domain.popup.entity.Image;
@@ -65,8 +65,10 @@ public class PopupService {
      * @return 팝업 목록
      */
     public Page<?> findAllPopupsByStatus(Host host, Pageable pageable, PopupCondition cond) {
-        return popupRepository.findAllPopupsByStatus(host, pageable, cond)
+        Page<?> popupList = popupRepository.findAllPopupsByStatus(host, pageable, cond)
                 .map(PopupPageResponseDto::of);
+        PageUtil.validatePageableWithPage(pageable, popupList);
+        return popupList;
     }
 
     /**

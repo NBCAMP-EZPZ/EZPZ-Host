@@ -53,7 +53,6 @@ public class PopupController {
         PopupCondition cond = PopupCondition.of(approvalStatus, popupStatus);
 
         Page<?> popupList = popupService.findAllPopupsByStatus(userDetails.getHost(), pageable, cond);
-        PageUtil.validatePageableWithPage(pageable, popupList);
         return getResponseEntity(popupList, "호스트의 팝업 목록 조회 성공");
     }
 

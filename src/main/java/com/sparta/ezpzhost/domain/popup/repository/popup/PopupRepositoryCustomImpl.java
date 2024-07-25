@@ -27,46 +27,46 @@ public class PopupRepositoryCustomImpl implements PopupRepositoryCustom {
 
     @Override
     public Page<Popup> findAllPopupsByStatus(Host host, Pageable pageable, PopupCondition cond) {
-        JPAQuery<Popup> query = findAllPopupsByStatusQuery(popup, host, cond)
+        // 데이터 조회 쿼리
+        List<Popup> popups = jpaQueryFactory
+                .select(popup)
+                .from(popup)
+                .where(
+                        hostEq(host),
+                        approvalStatusEq(cond.getApprovalStatus()),
+                        popupStatusEq(cond.getPopupStatus())
+                )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(popup.createdAt.desc());
+                .orderBy(popup.createdAt.desc())
+                .fetch();
 
-        List<Popup> popups = query.fetch();
-        Long totalSize = countQuery(host, cond).fetch().get(0);
+        // 카운트 쿼리
+        Long totalSize = jpaQueryFactory
+                .select(Wildcard.count)
+                .from(popup)
+                .where(
+                        hostEq(host),
+                        approvalStatusEq(cond.getApprovalStatus()),
+                        popupStatusEq(cond.getPopupStatus())
+                )
+                .fetchOne();
 
         return PageableExecutionUtils.getPage(popups, pageable, () -> totalSize);
     }
 
-    private <T> JPAQuery<T> findAllPopupsByStatusQuery(Expression<T> expr, Host host, PopupCondition cond) {
-        return jpaQueryFactory.select(expr)
-                .from(popup)
-                .where(
-                        hostEq(host),
-                        approvalStatusEq(cond.getApprovalStatus()),
-                        popupStatusEq(cond.getPopupStatus())
-                );
-    }
-
-    private JPAQuery<Long> countQuery(Host host, PopupCondition cond) {
-        return jpaQueryFactory.select(Wildcard.count)
-                .from(popup)
-                .where(
-                        hostEq(host),
-                        approvalStatusEq(cond.getApprovalStatus()),
-                        popupStatusEq(cond.getPopupStatus())
-                );
-    }
-
+    // 조건 : 호스트
     private BooleanExpression hostEq(Host host) {
         return Objects.nonNull(host) ? popup.host.eq(host) : null;
     }
 
+    // 조건 : 승인 상태
     private BooleanExpression approvalStatusEq(String statusBy) {
         return Objects.nonNull(statusBy) && !"all".equals(statusBy) ?
                 popup.approvalStatus.eq(ApprovalStatus.valueOf(statusBy.toUpperCase())) : null;
     }
 
+    // 조건 : 팝업 상태
     private BooleanExpression popupStatusEq(String statusBy) {
         return Objects.nonNull(statusBy) && !"all".equals(statusBy) ?
                 popup.popupStatus.eq(PopupStatus.valueOf(statusBy.toUpperCase())) : null;
