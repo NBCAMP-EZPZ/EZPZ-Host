@@ -4,8 +4,11 @@ import static com.sparta.ezpzhost.common.util.ControllerUtil.getResponseEntity;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,8 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.ezpzhost.common.dto.CommonResponse;
 import com.sparta.ezpzhost.common.security.UserDetailsImpl;
+import com.sparta.ezpzhost.domain.reservation.dto.ReservationListDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotRequestDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotResponseDto;
+import com.sparta.ezpzhost.domain.slot.dto.SlotResponseListDto;
 import com.sparta.ezpzhost.domain.slot.service.SlotService;
 
 import jakarta.validation.Valid;
@@ -29,6 +34,7 @@ public class SlotController {
 
 	/**
 	 * 예약 정보 슬롯 등록
+	 *
 	 * @param popupId 팝업 ID
 	 * @param requestDto 슬롯 생성 요청 DTO
 	 * @param userDetails 로그인 사용자 정보
@@ -44,4 +50,43 @@ public class SlotController {
 
 		return getResponseEntity(slotList, "예약 정보 등록 성공");
 	}
+	
+	/**
+	 * 예약 정보 슬롯 전체 조회
+	 *
+	 * @param popupId 팝업 ID
+	 * @param pageable 페이지 정보
+	 * @param userDetails 로그인 사용자 정보
+	 * @return 슬롯 리스트
+	 */
+	@GetMapping
+	public ResponseEntity<CommonResponse<?>> findSlots(
+		@PathVariable Long popupId,
+		Pageable pageable,
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		
+		Page<SlotResponseListDto> slotList = slotService.findSlots(popupId, pageable, userDetails.getHost());
+
+		return getResponseEntity(slotList, "예약 정보 조회 성공");
+	}
+	
+	/**
+	 * 예약 정보 상세 조회
+	 *
+	 * @param popupId
+	 * @param slotId
+	 * @param userDetails
+	 * @return
+	 */
+	@GetMapping("/{slotId}")
+	public ResponseEntity<CommonResponse<?>> findSlot(
+		@PathVariable Long popupId,
+		@PathVariable Long slotId,
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		
+		List<ReservationListDto> reservationList = slotService.findSlot(popupId, slotId, userDetails.getHost());
+
+		return getResponseEntity(reservationList, "예약 정보 상세 조회 성공");
+	}
+	
 }
