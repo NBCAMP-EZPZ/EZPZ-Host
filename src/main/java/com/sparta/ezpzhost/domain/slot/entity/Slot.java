@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import com.sparta.ezpzhost.common.entity.Timestamped;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
 import com.sparta.ezpzhost.domain.slot.dto.SlotCreateDto;
+import com.sparta.ezpzhost.domain.slot.dto.SlotUpdateDto;
 import com.sparta.ezpzhost.domain.slot.enums.SlotStatus;
 
 import jakarta.persistence.Column;
@@ -60,5 +61,11 @@ public class Slot extends Timestamped {
 	
 	public static Slot of(SlotCreateDto slotCreateDto) {
 		return new Slot(slotCreateDto);
+	}
+	
+	public void update(SlotUpdateDto requestDto) {
+		this.availableCount = requestDto.getAvailableCount();
+		this.totalCount = requestDto.getTotalCount();
+		this.slotStatus = SlotStatus.valueOf(requestDto.getSlotStatus());
 	}
 }

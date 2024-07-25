@@ -27,6 +27,7 @@ import com.sparta.ezpzhost.domain.slot.dto.SlotCreateDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotRequestDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotResponseDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotResponseListDto;
+import com.sparta.ezpzhost.domain.slot.dto.SlotUpdateDto;
 import com.sparta.ezpzhost.domain.slot.entity.Slot;
 import com.sparta.ezpzhost.domain.slot.repository.SlotRepository;
 
@@ -113,6 +114,24 @@ public class SlotService {
 		return ReservationListDto.listOf(reservationList);
 	}
 	
+	/**
+	 * 예약 정보 슬롯 수정
+	 *
+	 * @param popupId 팝업 ID
+	 * @param slotId 슬롯 ID
+	 * @param requestDto 슬롯 수정 요청 DTO
+	 * @param host 로그인 사용자 정보
+	 * @return 수정된 슬롯 정보
+	 */
+	public SlotResponseDto updateSlot(Long popupId, Long slotId, SlotUpdateDto requestDto, Host host) {
+		validatePopup(popupId, host.getId());
+		Slot slot = getSlot(popupId, slotId);
+		
+		slot.update(requestDto);
+		
+		return SlotResponseDto.of(slot);
+	}
+	
 	
 	
 	/* UTIL */
@@ -161,6 +180,18 @@ public class SlotService {
 			|| requestDto.getStartTime().isAfter(requestDto.getEndTime())) {
 			throw new CustomException(ErrorType.INVALID_DATE_TIME);
 		}
+	}
+	
+	/**
+	 * 슬롯 조회
+	 *
+	 * @param popupId 팝업 ID
+	 * @param slotId 슬롯 ID
+	 * @return 슬롯 정보
+	 */
+	private Slot getSlot(Long popupId, Long slotId) {
+		return slotRepository.findByIdAndPopupId(slotId, popupId)
+			.orElseThrow(() -> new CustomException(ErrorType.SLOT_NOT_FOUND));
 	}
 	
 	/**
