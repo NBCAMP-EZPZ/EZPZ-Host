@@ -34,7 +34,7 @@ public class OrderController {
      * @return 조건별 주문 목록
      */
     @GetMapping
-    public ResponseEntity<CommonResponse<?>> findOrdersAllByStatus(
+    public ResponseEntity<CommonResponse<?>> findAllOrders(
             Pageable pageable,
             @RequestParam(defaultValue = "all") String searchType,
             @RequestParam(defaultValue = "-1") Long itemId,
@@ -43,7 +43,7 @@ public class OrderController {
 
         OrderCondition cond = OrderCondition.of(searchType, itemId, orderStatus);
         return getResponseEntity(
-                orderService.findOrdersAllByStatus(cond, pageable, userDetails.getHost()),
+                orderService.findAllOrders(cond, pageable, userDetails.getHost()),
                 "주문 목록 조회 성공");
 
     }

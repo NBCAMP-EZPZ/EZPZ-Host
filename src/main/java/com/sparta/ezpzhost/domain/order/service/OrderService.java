@@ -36,7 +36,7 @@ public class OrderService {
      * @param host     요청한 호스트
      * @return 조회 조건에 따른 주문 목록
      */
-    public Page<OrderFindAllResponseDto> findOrdersAllByStatus(OrderCondition cond,
+    public Page<OrderFindAllResponseDto> findAllOrders(OrderCondition cond,
             Pageable pageable, Host host) {
         if (cond.getItemId() != -1) {
             Item item = itemRepository.findById(cond.getItemId())
