@@ -8,11 +8,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -111,5 +111,24 @@ public class SlotController {
 		SlotResponseDto slotResponseDto =  slotService.updateSlot(popupId, slotId, requestDto, userDetails.getHost());
 
 		return getResponseEntity(slotResponseDto, "예약 정보 수정 성공");
+	}
+	
+	/**
+	 * 예약 정보 삭제
+	 *
+	 * @param popupId 팝업 ID
+	 * @param slotId 슬롯 ID
+	 * @param userDetails 로그인 사용자 정보
+	 * @return 삭제된 슬롯 정보
+	 */
+	@DeleteMapping("/{slotId}")
+	public ResponseEntity<CommonResponse<?>> deleteSlot(
+		@PathVariable Long popupId,
+		@PathVariable Long slotId,
+		@AuthenticationPrincipal UserDetailsImpl userDetails) {
+		
+		slotService.deleteSlot(popupId, slotId, userDetails.getHost());
+
+		return getResponseEntity(null, "예약 정보 삭제 성공");
 	}
 }

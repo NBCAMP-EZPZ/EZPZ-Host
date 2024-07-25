@@ -2,13 +2,16 @@ package com.sparta.ezpzhost.domain.slot.entity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import com.sparta.ezpzhost.common.entity.Timestamped;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
+import com.sparta.ezpzhost.domain.reservation.entity.Reservation;
 import com.sparta.ezpzhost.domain.slot.dto.SlotCreateDto;
 import com.sparta.ezpzhost.domain.slot.dto.SlotUpdateDto;
 import com.sparta.ezpzhost.domain.slot.enums.SlotStatus;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,6 +22,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,6 +52,9 @@ public class Slot extends Timestamped {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "popup_id", nullable = false)
 	private Popup popup;
+	
+	@OneToMany(mappedBy = "slot", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Reservation> reservation;
 	
 	private Slot(SlotCreateDto slotCreateDto) {
 		this.slotDate = slotCreateDto.getDate();

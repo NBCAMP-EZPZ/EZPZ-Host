@@ -123,6 +123,7 @@ public class SlotService {
 	 * @param host 로그인 사용자 정보
 	 * @return 수정된 슬롯 정보
 	 */
+	@Transactional
 	public SlotResponseDto updateSlot(Long popupId, Long slotId, SlotUpdateDto requestDto, Host host) {
 		validatePopup(popupId, host.getId());
 		Slot slot = getSlot(popupId, slotId);
@@ -130,6 +131,21 @@ public class SlotService {
 		slot.update(requestDto);
 		
 		return SlotResponseDto.of(slot);
+	}
+	
+	/**
+	 * 예약 정보 슬롯 삭제
+	 *
+	 * @param popupId 팝업 ID
+	 * @param slotId 슬롯 ID
+	 * @param host 로그인 사용자 정보
+	 */
+	@Transactional
+	public void deleteSlot(Long popupId, Long slotId, Host host) {
+		validatePopup(popupId, host.getId());
+		Slot slot = getSlot(popupId, slotId);
+		
+		slotRepository.delete(slot);
 	}
 	
 	
