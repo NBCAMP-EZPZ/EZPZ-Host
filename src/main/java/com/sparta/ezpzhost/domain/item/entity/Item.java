@@ -23,7 +23,7 @@ public class Item extends Timestamped {
     @Column(name = "item_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "popup_id", nullable = false)
     private Popup popup;
 
@@ -69,7 +69,16 @@ public class Item extends Timestamped {
     }
 
     /**
-     * 상품 수정
+     * 수정 가능 여부 확인
+     */
+    public void checkPossibleUpdateStatus() {
+        if (this.itemStatus.equals(ItemStatus.SALE_END) || this.itemStatus.equals(ItemStatus.SOLD_OUT)) {
+            throw new CustomException(ErrorType.ITEM_ALREADY_QUIT);
+        }
+    }
+
+    /**
+     * 상품 수정 (사진 포함 O)
      * @param requestDto 상품 수정 정보
      * @param image 상품 사진 정보
      */
@@ -80,6 +89,17 @@ public class Item extends Timestamped {
         this.stock = requestDto.getStock();
         this.imageUrl = image.getUrl();
         this.imageName = image.getName();
+    }
+
+    /**
+     * 상품 수정 (사진 포함 X)
+     * @param requestDto 상품 수정 정보
+     */
+    public void update(ItemRequestDto requestDto) {
+        this.name = requestDto.getName();
+        this.description = requestDto.getDescription();
+        this.price = requestDto.getPrice();
+        this.stock = requestDto.getStock();
     }
 
     /**

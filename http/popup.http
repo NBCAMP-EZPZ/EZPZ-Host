@@ -1,5 +1,5 @@
 ## Variables
-@popupId = 30
+@popupId = 33
 
 ### 팝업 등록
 POST http://localhost:8081/api/v1/popups
@@ -10,7 +10,7 @@ Content-Type: multipart/form-data; boundary=boundary
 --boundary
 Content-Disposition: form-data; name="name";
 
-name6
+test
 
 --boundary
 Content-Disposition: form-data; name="description";
@@ -75,7 +75,7 @@ Content-Type: multipart/form-data; boundary=boundary
 --boundary
 Content-Disposition: form-data; name="name";
 
-update name
+update test7
 
 --boundary
 Content-Disposition: form-data; name="description";
@@ -109,6 +109,12 @@ Content-Disposition: form-data; name="endDate";
 
 --boundary
 Content-Disposition: form-data; name="thumbnail"; filename="thumbnail.jpeg";
+Content-Type: image/png
+
+< images/image.png
+
+--boundary
+Content-Disposition: form-data; name="images"; filename="image/63c055abfb2a4baca761d1c694150ceb.png";
 Content-Type: image/png
 
 < images/image.png

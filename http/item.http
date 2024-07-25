@@ -1,6 +1,6 @@
 ## Variables
 @popupId = 31
-@itemId = 4
+@itemId = 3
 
 ### 굿즈 상품 등록
 POST http://localhost:8081/api/v1/popups/{{popupId}}/items
@@ -35,9 +35,9 @@ Content-Type: image/png
 < images/image.png
 
 ### 팝업 및 상태별 굿즈 상품 목록 조회
-### 팝업 ID : popupId=1
+### 팝업 ID : popupId=30
 ### 상품 상태 : ItemStatus=(before_sale, sale, sale_end, sold_out)
-GET http://localhost:8081/api/v1/items?itemStatus=before_sale
+GET http://localhost:8081/api/v1/items?itemStatus=sale&popupId=30
 Authorization: {{Authorization}}
 Cookie: {{Cookie}}
 
@@ -55,7 +55,7 @@ Content-Type: multipart/form-data; boundary=boundary
 --boundary
 Content-Disposition: form-data; name="name";
 
-update name2
+update name123
 
 --boundary
 Content-Disposition: form-data; name="description";
@@ -73,7 +73,7 @@ Content-Disposition: form-data; name="stock";
 50
 
 --boundary
-Content-Disposition: form-data; name="image"; filename="image.jpeg";
+Content-Disposition: form-data; name="image"; filename="item/e9be3a7e471940009898d7220b1f617d.jpeg";
 Content-Type: image/png
 
 < images/image.png

@@ -33,6 +33,7 @@ public enum ErrorType {
     POPUP_NOT_APPROVAL(HttpStatus.BAD_REQUEST, "승인되지 않은 팝업입니다."),
     POPUP_CANCEL_FORBIDDEN(HttpStatus.FORBIDDEN, "진행 예정 상태인 팝업만 취소할 수 있습니다."),
     DUPLICATED_POPUP_NAME(HttpStatus.BAD_REQUEST, "이미 존재하는 팝업명입니다."),
+    POPUP_STATUS_IMPASSIBLE(HttpStatus.BAD_REQUEST, "반려되거나 취소된 팝업은 수정할 수 없습니다."),
     ITEM_REGISTRATION_IMPOSSIBLE(HttpStatus.BAD_REQUEST, "해당 팝업은 굿즈 상품을 등록할 수 없습니다."),
 
 

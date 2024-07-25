@@ -39,9 +39,7 @@ public class ItemService {
     public ItemResponseDto createItem(Host host, Long popupId, ItemRequestDto requestDto) {
 
         // 굿즈명 중복 체크
-        if (itemRepository.existsByName(requestDto.getName())) {
-            throw new CustomException(ErrorType.DUPLICATED_ITEM_NAME);
-        }
+        duplicatedItemName(requestDto.getName());
 
         Popup popup = popupService.findPopupByIdAndHostId(popupId, host.getId());
         popup.checkItemCanBeRegistered();
@@ -87,23 +85,28 @@ public class ItemService {
     @Transactional
     public ItemResponseDto updateItem(Long itemId, ItemRequestDto requestDto, Host host) {
 
-        // 굿즈명 중복 체크
-        if (itemRepository.existsByName(requestDto.getName())) {
-            throw new CustomException(ErrorType.DUPLICATED_ITEM_NAME);
-        }
+        // 굿즈명 중복 확인
+        duplicatedItemName(requestDto.getName());
 
+        // 수정 권한 및 가능 여부 확인
         Item item = findItemByIdAndHost(itemId, host);
+        item.checkPossibleUpdateStatus();
 
         String imageName = item.getImageName();
 
-        // 상품 사진 업로드
-        ImageResponseDto image = imageService.uploadItemImage(requestDto.getImage());
+        // 상품 사진 변경 확인
+        if (imageName.equals(requestDto.getImage().getOriginalFilename())) {
+            item.update(requestDto);
+        }else {
+            // 상품 사진 업로드
+            ImageResponseDto image = imageService.uploadItemImage(requestDto.getImage());
 
-        item.update(requestDto, image);
+            item.update(requestDto, image);
+
+            imageService.deleteItemImage(imageName);
+        }
 
         Item savedItem = itemRepository.save(item);
-
-        imageService.deleteItemImage(imageName);
         return ItemResponseDto.of(savedItem);
     }
 
@@ -131,5 +134,15 @@ public class ItemService {
     private Item findItemByIdAndHost(Long itemId, Host host) {
         return itemRepository.findByIdAndPopup_Host(itemId, host)
                 .orElseThrow(() -> new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN));
+    }
+
+    /**
+     * 상품명 중복 체크
+     * @param itemName 상품명
+     */
+    private void duplicatedItemName(String itemName) {
+        if (itemRepository.existsByName(itemName)) {
+            throw new CustomException(ErrorType.DUPLICATED_ITEM_NAME);
+        }
     }
 }

@@ -13,6 +13,7 @@ public class PopupResponseDto {
     private final String name;
     private final String description;
     private final String thumbnailUrl;
+    private final String thumbnailName;
     private final String address;
     private final String managerName;
     private final String phoneNumber;
@@ -21,13 +22,14 @@ public class PopupResponseDto {
     private final int likeCount;
     private final LocalDateTime startDate;
     private final LocalDateTime endDate;
-    private final List<String> images;
+    private final List<ImageResponseDto> images;
 
-    private PopupResponseDto(Popup popup, List<String> images) {
+    private PopupResponseDto(Popup popup, List<ImageResponseDto> images) {
         this.id = popup.getId();
         this.name = popup.getName();
         this.description = popup.getDescription();
         this.thumbnailUrl = popup.getThumbnailUrl();
+        this.thumbnailName = popup.getThumbnailName();
         this.address = popup.getAddress();
         this.managerName = popup.getManagerName();
         this.phoneNumber = popup.getPhoneNumber();
@@ -36,10 +38,11 @@ public class PopupResponseDto {
         this.likeCount = popup.getLikeCount();
         this.startDate = popup.getStartDate();
         this.endDate = popup.getEndDate();
+
         this.images = images;
     }
 
-    public static PopupResponseDto of(Popup popup, List<String> images) {
+    public static PopupResponseDto of(Popup popup, List<ImageResponseDto> images) {
         return new PopupResponseDto(popup, images);
     }
 }

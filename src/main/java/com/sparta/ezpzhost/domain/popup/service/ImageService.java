@@ -29,7 +29,7 @@ public class ImageService {
      * @param images 추가 사진 목록
      * @return 추가 사진 url
      */
-    public List<String> saveImages(Popup popup, List<MultipartFile> images) {
+    public List<ImageResponseDto> saveImages(Popup popup, List<MultipartFile> images) {
 
         if (images.size() > 3 || images.isEmpty()) {
             throw new CustomException(ErrorType.IMAGE_COUNT_EXCEEDED);
@@ -39,9 +39,9 @@ public class ImageService {
                 .map(img -> Image.of(popup, uploadImage(img)))
                 .toList();
 
-        imageRepository.saveAll(imageList);
-
-        return imageList.stream().map(Image::getUrl).toList();
+        return imageRepository.saveAll(imageList).stream()
+                .map(ImageResponseDto::of)
+                .toList();
     }
 
     /**
@@ -76,9 +76,9 @@ public class ImageService {
      * @param popup 팝업
      * @return 이미지 url 목록
      */
-    public List<String> findAllByPopup(Popup popup) {
+    public List<ImageResponseDto> findAllByPopup(Popup popup) {
         return imageRepository.findAllByPopup(popup).stream()
-                .map(Image::getUrl)
+                .map(ImageResponseDto::of)
                 .toList();
     }
 
