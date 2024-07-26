@@ -5,11 +5,9 @@ import com.sparta.ezpzhost.common.exception.ErrorType;
 import com.sparta.ezpzhost.domain.order.enums.OrderSearchType;
 import com.sparta.ezpzhost.domain.order.enums.OrderStatus;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.util.StringUtils;
 
 @Getter
-@Setter
 public class OrderCondition {
 
     private final OrderSearchType searchType;
@@ -22,23 +20,26 @@ public class OrderCondition {
         this.orderStatus = orderStatus;
     }
 
-    public static OrderCondition of(String searchType, Long itemId, String orderStatus) {
-        if (!StringUtils.hasText(searchType) || !OrderSearchType.isValid(searchType)) {
+    public static OrderCondition of(OrderRequestDto orderRequestDto) {
+        if (!StringUtils.hasText(orderRequestDto.getSearchType()) || !OrderSearchType.isValid(
+                orderRequestDto.getSearchType())) {
             throw new CustomException(ErrorType.INVALID_ORDER_SORT_CONDITION);
         }
-        OrderSearchType type = OrderSearchType.valueOf(searchType.toUpperCase());
+        OrderSearchType type = OrderSearchType.valueOf(
+                orderRequestDto.getSearchType().toUpperCase());
         OrderStatus status = null;
 
         if ((type == OrderSearchType.BY_STATUS || type == OrderSearchType.BY_ITEM_AND_STATUS) &&
-                (!StringUtils.hasText(orderStatus) || !OrderStatus.isValid(orderStatus))) {
+                (!StringUtils.hasText(orderRequestDto.getOrderStatus()) || !OrderStatus.isValid(
+                        orderRequestDto.getOrderStatus()))) {
             throw new CustomException(ErrorType.INVALID_ORDER_SORT_CONDITION);
         }
 
         if (type == OrderSearchType.BY_STATUS || type == OrderSearchType.BY_ITEM_AND_STATUS) {
-            status = OrderStatus.valueOf(orderStatus.toUpperCase());
+            status = OrderStatus.valueOf(orderRequestDto.getOrderStatus().toUpperCase());
         }
 
-        return new OrderCondition(type, itemId, status);
+        return new OrderCondition(type, orderRequestDto.getItemId(), status);
     }
 
 }

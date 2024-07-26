@@ -4,6 +4,7 @@ import static com.sparta.ezpzhost.common.util.ControllerUtil.getResponseEntity;
 
 import com.sparta.ezpzhost.common.dto.CommonResponse;
 import com.sparta.ezpzhost.common.security.UserDetailsImpl;
+import com.sparta.ezpzhost.domain.order.dto.OrderRequestDto;
 import com.sparta.ezpzhost.domain.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;

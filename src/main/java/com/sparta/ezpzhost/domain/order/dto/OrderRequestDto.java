@@ -1,4 +1,4 @@
-package com.sparta.ezpzhost.domain.order.controller;
+package com.sparta.ezpzhost.domain.order.dto;
 
 import lombok.Getter;
 

@@ -2,12 +2,13 @@ package com.sparta.ezpzhost.domain.order.service;
 
 import com.sparta.ezpzhost.common.exception.CustomException;
 import com.sparta.ezpzhost.common.exception.ErrorType;
+import com.sparta.ezpzhost.common.util.PageUtil;
 import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.item.entity.Item;
 import com.sparta.ezpzhost.domain.item.repository.ItemRepository;
-import com.sparta.ezpzhost.domain.order.controller.OrderRequestDto;
 import com.sparta.ezpzhost.domain.order.dto.OrderCondition;
 import com.sparta.ezpzhost.domain.order.dto.OrderFindAllResponseDto;
+import com.sparta.ezpzhost.domain.order.dto.OrderRequestDto;
 import com.sparta.ezpzhost.domain.order.dto.OrderResponseDto;
 import com.sparta.ezpzhost.domain.order.entity.Order;
 import com.sparta.ezpzhost.domain.order.enums.OrderSearchType;
@@ -40,10 +41,7 @@ public class OrderService {
      */
     public Page<OrderFindAllResponseDto> findAllOrders(OrderRequestDto orderRequestDto,
             Pageable pageable, Host host) {
-        OrderCondition cond = OrderCondition.of(
-                orderRequestDto.getSearchType(),
-                orderRequestDto.getItemId(),
-                orderRequestDto.getOrderStatus());
+        OrderCondition cond = OrderCondition.of(orderRequestDto);
 
         if (cond.getItemId() != -1 && cond.getSearchType().equals(OrderSearchType.BY_ITEM)) {
             Item item = itemRepository.findById(cond.getItemId())
@@ -53,6 +51,7 @@ public class OrderService {
             }
         }
         Page<Order> orderPages = orderRepository.findOrdersAllByStatus(cond, pageable, host);
+        PageUtil.validatePageableWithPage(pageable, orderPages);
         return orderPages.map(OrderFindAllResponseDto::of);
     }
 
