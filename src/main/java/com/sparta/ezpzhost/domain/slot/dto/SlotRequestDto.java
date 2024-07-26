@@ -6,9 +6,11 @@ import java.time.LocalTime;
 import org.hibernate.validator.constraints.Range;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class SlotRequestDto {
 	@NotNull(message = "예약 시작 날짜를 입력해주세요.")
 	private LocalDate startDate;
