@@ -54,7 +54,7 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 
     // 조건 : 호스트
     private BooleanExpression hostEq(Host host) {
-        return Objects.nonNull(host) ? item.popup.host.eq(host) : null;
+        return Objects.nonNull(host) ? item.popup.host.id.eq(host.getId()) : null;
     }
 
     // 조건 : 팝업 ID
