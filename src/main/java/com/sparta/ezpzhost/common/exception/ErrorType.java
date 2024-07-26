@@ -44,6 +44,8 @@ public enum ErrorType {
     IMAGE_COUNT_EXCEEDED(HttpStatus.PAYLOAD_TOO_LARGE, "추가 사진은 최소 1개, 최대 3개까지 등록 가능합니다"),
 
     // Order
+    INVALID_ORDER_SORT_CONDITION(HttpStatus.BAD_REQUEST, "유효하지 않은 주문 정렬 조건입니다."),
+    ORDER_NOT_FOUND_OR_ACCESS_DENIED(HttpStatus.BAD_REQUEST, "해당 주문이 존재하지 않거나, 상품에 대한 권한이 없습니다."),
 
     // Item
     DUPLICATED_ITEM_NAME(HttpStatus.BAD_REQUEST, "이미 존재하는 굿즈명입니다."),
@@ -56,7 +58,7 @@ public enum ErrorType {
     INVALID_DATE_TIME(HttpStatus.BAD_REQUEST, "예약을 등록할 수 있는 날짜, 시간이 아닙니다."),
     SLOT_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 예약 슬롯이 존재합니다."),
     SLOT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 슬롯이 존재하지 않습니다."),
-    
+
 
     // Page
     INVALID_PAGE(HttpStatus.BAD_REQUEST, "페이지 번호가 올바르지 않습니다."),
