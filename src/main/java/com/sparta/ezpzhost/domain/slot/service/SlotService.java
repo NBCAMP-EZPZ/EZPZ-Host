@@ -160,7 +160,7 @@ public class SlotService {
 	 * @param hostId 호스트 ID
 	 * @return 팝업
 	 */
-	private Popup validatePopup(Long popupId, Long hostId) {
+	public Popup validatePopup(Long popupId, Long hostId) {
 		Popup popup = popupRepository.findByIdAndHostId(popupId, hostId)
 			.orElseThrow(() -> new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN));
 		
@@ -176,7 +176,7 @@ public class SlotService {
 	 *
 	 * @param popupId 팝업 ID
 	 */
-	private void existPopupSlot(Long popupId) {
+	public void existPopupSlot(Long popupId) {
 		if (slotRepository.existsByPopupId(popupId)) {
 			// 이미 슬롯이 생성된 팝업인 경우
 			throw new CustomException(ErrorType.SLOT_ALREADY_EXISTS);
@@ -208,21 +208,5 @@ public class SlotService {
 	private Slot getSlot(Long popupId, Long slotId) {
 		return slotRepository.findByIdAndPopupId(slotId, popupId)
 			.orElseThrow(() -> new CustomException(ErrorType.SLOT_NOT_FOUND));
-	}
-	
-	/**
-	 * 페이지 유효성 확인
-	 *
-	 * @param page
-	 * @param pageList
-	 */
-	private static void validatePage(int page, Page<?> pageList) {
-		if(pageList.getTotalElements() == 0) {
-			throw new CustomException(ErrorType.NOT_FOUND_PAGE);
-		}
-		
-		if(page + 1> pageList.getTotalPages()) {
-			throw new CustomException(ErrorType.INVALID_PAGE);
-		}
 	}
 }
