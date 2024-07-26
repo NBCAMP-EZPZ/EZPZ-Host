@@ -22,7 +22,6 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
@@ -38,7 +37,6 @@ public class Order extends Timestamped {
     @Column(nullable = false)
     private int totalPrice;
 
-    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus orderStatus;
@@ -50,22 +48,4 @@ public class Order extends Timestamped {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Orderline> orderlineList = new ArrayList<>();
 
-    /**
-     * Order 생성자
-     *
-     * @param user 주문자
-     */
-    private Order(User user) {
-        this.user = user;
-    }
-
-    /**
-     * Order 정적 팩토리 메서드
-     *
-     * @param user 주문자
-     * @return
-     */
-    public static Order of(User user) {
-        return new Order(user);
-    }
 }

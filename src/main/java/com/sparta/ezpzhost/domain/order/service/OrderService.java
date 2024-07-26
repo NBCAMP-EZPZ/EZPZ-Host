@@ -5,10 +5,12 @@ import com.sparta.ezpzhost.common.exception.ErrorType;
 import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.item.entity.Item;
 import com.sparta.ezpzhost.domain.item.repository.ItemRepository;
+import com.sparta.ezpzhost.domain.order.controller.OrderRequestDto;
 import com.sparta.ezpzhost.domain.order.dto.OrderCondition;
 import com.sparta.ezpzhost.domain.order.dto.OrderFindAllResponseDto;
 import com.sparta.ezpzhost.domain.order.dto.OrderResponseDto;
 import com.sparta.ezpzhost.domain.order.entity.Order;
+import com.sparta.ezpzhost.domain.order.enums.OrderSearchType;
 import com.sparta.ezpzhost.domain.order.repository.OrderRepository;
 import com.sparta.ezpzhost.domain.orderline.dto.OrderlineResponseDto;
 import com.sparta.ezpzhost.domain.orderline.repository.OrderlineRepository;
@@ -31,14 +33,19 @@ public class OrderService {
     /**
      * 조건별 주문 목록 조회
      *
-     * @param cond     조회 조건
-     * @param pageable 페이지네이션 조건
-     * @param host     요청한 호스트
+     * @param orderRequestDto 조회 조건
+     * @param pageable        페이지네이션 조건
+     * @param host            요청한 호스트
      * @return 조회 조건에 따른 주문 목록
      */
-    public Page<OrderFindAllResponseDto> findAllOrders(OrderCondition cond,
+    public Page<OrderFindAllResponseDto> findAllOrders(OrderRequestDto orderRequestDto,
             Pageable pageable, Host host) {
-        if (cond.getItemId() != -1) {
+        OrderCondition cond = OrderCondition.of(
+                orderRequestDto.getSearchType(),
+                orderRequestDto.getItemId(),
+                orderRequestDto.getOrderStatus());
+
+        if (cond.getItemId() != -1 && cond.getSearchType().equals(OrderSearchType.BY_ITEM)) {
             Item item = itemRepository.findById(cond.getItemId())
                     .orElseThrow(() -> new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN));
             if (!item.getPopup().getHost().getId().equals(host.getId())) {
@@ -65,8 +72,9 @@ public class OrderService {
 
         List<OrderlineResponseDto> orderlineResponseDtoList = order.getOrderlineList().stream()
                 .filter(orderline -> itemRepository.isItemSoldByHost(orderline.getItem().getId(),
-                        host.getId())).toList().stream().map(OrderlineResponseDto::of).toList();
-
+                        host.getId()))
+                .map(OrderlineResponseDto::of)
+                .toList();
         return OrderResponseDto.of(order, orderlineResponseDtoList);
     }
 }
