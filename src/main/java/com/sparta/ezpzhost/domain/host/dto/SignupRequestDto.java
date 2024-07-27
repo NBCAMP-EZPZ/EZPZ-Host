@@ -3,9 +3,11 @@ package com.sparta.ezpzhost.domain.host.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class SignupRequestDto {
 
     @NotBlank(message = "ID는 공백일 수 없습니다.")
