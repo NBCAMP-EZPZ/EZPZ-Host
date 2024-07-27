@@ -1,8 +1,10 @@
 package com.sparta.ezpzhost.domain.order.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class OrderRequestDto {
 
     private String searchType = "all"; // 기본값 설정

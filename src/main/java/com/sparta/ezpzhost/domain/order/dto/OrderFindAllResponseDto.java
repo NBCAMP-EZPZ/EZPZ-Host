@@ -1,9 +1,11 @@
 package com.sparta.ezpzhost.domain.order.dto;
 
 import com.sparta.ezpzhost.domain.order.entity.Order;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class OrderFindAllResponseDto {
 
     private Long orderId;

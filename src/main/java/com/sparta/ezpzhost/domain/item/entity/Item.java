@@ -7,8 +7,18 @@ import com.sparta.ezpzhost.domain.item.dto.ItemRequestDto;
 import com.sparta.ezpzhost.domain.item.enums.ItemStatus;
 import com.sparta.ezpzhost.domain.popup.dto.ImageResponseDto;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
@@ -16,6 +26,7 @@ import org.springframework.util.StringUtils;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Item extends Timestamped {
 
     @Id
@@ -52,7 +63,8 @@ public class Item extends Timestamped {
     @Enumerated(EnumType.STRING)
     private ItemStatus itemStatus;
 
-    private Item(Popup popup, ItemRequestDto requestDto, ImageResponseDto image, ItemStatus itemStatus) {
+    private Item(Popup popup, ItemRequestDto requestDto, ImageResponseDto image,
+            ItemStatus itemStatus) {
         this.popup = popup;
         this.name = requestDto.getName();
         this.description = requestDto.getDescription();
@@ -72,15 +84,17 @@ public class Item extends Timestamped {
      * 수정 가능 여부 확인
      */
     public void checkPossibleUpdateStatus() {
-        if (this.itemStatus.equals(ItemStatus.SALE_END) || this.itemStatus.equals(ItemStatus.SOLD_OUT)) {
+        if (this.itemStatus.equals(ItemStatus.SALE_END) || this.itemStatus.equals(
+                ItemStatus.SOLD_OUT)) {
             throw new CustomException(ErrorType.ITEM_ALREADY_QUIT);
         }
     }
 
     /**
      * 상품 수정 (사진 포함 O)
+     *
      * @param requestDto 상품 수정 정보
-     * @param image 상품 사진 정보
+     * @param image      상품 사진 정보
      */
     public void update(ItemRequestDto requestDto, ImageResponseDto image) {
         this.name = requestDto.getName();
@@ -93,6 +107,7 @@ public class Item extends Timestamped {
 
     /**
      * 상품 수정 (사진 포함 X)
+     *
      * @param requestDto 상품 수정 정보
      */
     public void update(ItemRequestDto requestDto) {
