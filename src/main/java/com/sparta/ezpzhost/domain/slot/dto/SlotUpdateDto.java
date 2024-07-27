@@ -3,9 +3,11 @@ package com.sparta.ezpzhost.domain.slot.dto;
 import org.hibernate.validator.constraints.Range;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class SlotUpdateDto {
 	@Range(min = 1, max = 2, message = "1인 최대 예약 가능 인원 수는 1~2명입니다.")
 	private int availableCount;
