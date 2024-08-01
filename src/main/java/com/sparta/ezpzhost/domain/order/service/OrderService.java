@@ -16,6 +16,7 @@ import com.sparta.ezpzhost.domain.order.repository.OrderRepository;
 import com.sparta.ezpzhost.domain.orderline.dto.OrderlineResponseDto;
 import com.sparta.ezpzhost.domain.orderline.repository.OrderlineRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,11 +45,14 @@ public class OrderService {
         OrderCondition cond = OrderCondition.of(orderRequestDto);
 
         if (cond.getItemId() != -1 && cond.getSearchType().equals(OrderSearchType.BY_ITEM)) {
-            Item item = itemRepository.findById(cond.getItemId())
-                    .orElseThrow(() -> new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN));
-            if (!item.getPopup().getHost().getId().equals(host.getId())) {
+            Optional<Item> item = itemRepository.findByIdAndPopup_Host(cond.getItemId(), host);
+
+            if (item.isEmpty()) {
                 throw new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN);
             }
+//            if (!item.getPopup().getHost().getId().equals(host.getId())) {
+//                throw new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN);
+//            }
         }
         Page<Order> orderPages = orderRepository.findOrdersAllByStatus(cond, pageable, host);
         PageUtil.validatePageableWithPage(pageable, orderPages);
