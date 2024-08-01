@@ -16,7 +16,7 @@ public class OrderCondition {
 
     public OrderCondition(OrderSearchType searchType, Long itemId, OrderStatus orderStatus) {
         this.searchType = searchType;
-        this.itemId = itemId;
+        this.itemId = itemId != null ? itemId : -1L; // 기본값 설정
         this.orderStatus = orderStatus;
     }
 
@@ -41,5 +41,5 @@ public class OrderCondition {
 
         return new OrderCondition(type, orderRequestDto.getItemId(), status);
     }
-
 }
+

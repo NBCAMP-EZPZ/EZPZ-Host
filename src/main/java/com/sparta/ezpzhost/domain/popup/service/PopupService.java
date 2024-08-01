@@ -4,12 +4,17 @@ import com.sparta.ezpzhost.common.exception.CustomException;
 import com.sparta.ezpzhost.common.exception.ErrorType;
 import com.sparta.ezpzhost.common.util.PageUtil;
 import com.sparta.ezpzhost.domain.host.entity.Host;
-import com.sparta.ezpzhost.domain.popup.dto.*;
+import com.sparta.ezpzhost.domain.popup.dto.ImageResponseDto;
+import com.sparta.ezpzhost.domain.popup.dto.PopupCondition;
+import com.sparta.ezpzhost.domain.popup.dto.PopupPageResponseDto;
+import com.sparta.ezpzhost.domain.popup.dto.PopupRequestDto;
+import com.sparta.ezpzhost.domain.popup.dto.PopupResponseDto;
 import com.sparta.ezpzhost.domain.popup.entity.Image;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
 import com.sparta.ezpzhost.domain.popup.enums.ApprovalStatus;
 import com.sparta.ezpzhost.domain.popup.enums.PopupStatus;
 import com.sparta.ezpzhost.domain.popup.repository.popup.PopupRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -17,8 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +36,7 @@ public class PopupService {
      * 팝업 등록
      *
      * @param requestDto 팝업 등록 정보
-     * @param host 개최자
+     * @param host       개최자
      * @return 팝업 정보
      */
     @Transactional
@@ -61,7 +64,7 @@ public class PopupService {
      *
      * @param host     호스트
      * @param pageable 페이징
-     * @param cond 조회 조건
+     * @param cond     조회 조건
      * @return 팝업 목록
      */
     public Page<?> findAllPopupsByStatus(Host host, Pageable pageable, PopupCondition cond) {
@@ -73,8 +76,9 @@ public class PopupService {
 
     /**
      * 팝업 상세 조회
+     *
      * @param popupId 팝업 ID
-     * @param host 호스트
+     * @param host    호스트
      * @return 팝업 상세정보
      */
     public PopupResponseDto findPopup(Long popupId, Host host) {
@@ -87,20 +91,23 @@ public class PopupService {
 
     /**
      * 팝업 수정
-     * @param popupId 팝업 ID
+     *
+     * @param popupId    팝업 ID
      * @param requestDto 팝업 수정 정보
-     * @param host 호스트
+     * @param host       호스트
      * @return 팝업 정보
      */
     @Transactional
     public PopupResponseDto updatePopup(Long popupId, PopupRequestDto requestDto, Host host) {
 
-        // 팝업명 중복 체크
-        duplicatedPopupName(requestDto.getName());
-
         // 팝업 권한 및 수정 가능 여부 확인
         Popup popup = findPopupByIdAndHostId(popupId, host.getId());
         popup.checkPossibleUpdateStatus();
+
+        if (!popup.getName().equals(requestDto.getName())) {
+            // 팝업명 중복 체크
+            duplicatedPopupName(requestDto.getName());
+        }
 
         String thumbnailName = popup.getThumbnailName(); // 기존 썸네일
         List<Image> imageNames = imageService.findAllImageByPopup(popup); // 기존 추가 사진
@@ -122,7 +129,8 @@ public class PopupService {
         // 썸네일 변경 확인
         if (!thumbnailName.equals(requestDto.getThumbnail().getOriginalFilename())) {
             // 썸네일 업로드 및 이전 썸네일 삭제 (S3)
-            ImageResponseDto updateThumbnail = imageService.uploadThumbnail(requestDto.getThumbnail());
+            ImageResponseDto updateThumbnail = imageService.uploadThumbnail(
+                    requestDto.getThumbnail());
             popup.updateThumbnail(updateThumbnail);
             imageService.deleteThumbnail(thumbnailName);
         }
@@ -150,8 +158,9 @@ public class PopupService {
 
     /**
      * 팝업 취소
+     *
      * @param popupId 팝업 ID
-     * @param host 호스트
+     * @param host    호스트
      */
     @Transactional
     public void cancelPopup(Long popupId, Host host) {
@@ -169,16 +178,18 @@ public class PopupService {
 
     /**
      * 팝업 찾기
+     *
      * @param popupId 팝업 ID
      * @return 팝업
      */
     public Popup findPopupByIdAndHostId(Long popupId, Long hostId) {
         return popupRepository.findByIdAndHostId(popupId, hostId)
-                .orElseThrow(()-> new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN));
+                .orElseThrow(() -> new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN));
     }
 
     /**
      * 팝업명 중복 확인
+     *
      * @param popupName 팝업명
      */
     private void duplicatedPopupName(String popupName) {

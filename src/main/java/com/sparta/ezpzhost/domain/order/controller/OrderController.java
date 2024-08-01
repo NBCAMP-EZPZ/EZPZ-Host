@@ -12,8 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -26,22 +26,26 @@ public class OrderController {
     /**
      * 주문 목록 조회
      *
-     * @param pageable        페이지네이션 조건
-     * @param orderRequestDto 조회 조건
-     * @param userDetails     사용자 정보
+     * @param pageable    페이지네이션 조건
+     * @param userDetails 사용자 정보
      * @return 조건별 주문 목록
      */
     @GetMapping
     public ResponseEntity<CommonResponse<?>> findAllOrders(
             Pageable pageable,
-            @RequestBody OrderRequestDto orderRequestDto,
+            @RequestParam(defaultValue = "all") String searchType,
+            @RequestParam(defaultValue = "-1") Long itemId,
+            @RequestParam(defaultValue = "all") String orderStatus,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        OrderRequestDto orderRequestDto = new OrderRequestDto(searchType, itemId, orderStatus);
 
         return getResponseEntity(
                 orderService.findAllOrders(orderRequestDto, pageable, userDetails.getHost()),
                 "주문 목록 조회 성공");
 
     }
+
 
     /**
      * 주문 상세 조회
