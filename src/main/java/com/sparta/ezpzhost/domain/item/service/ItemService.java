@@ -30,8 +30,9 @@ public class ItemService {
 
     /**
      * 상품 등록
-     * @param host 호스트
-     * @param popupId 팝업 ID
+     *
+     * @param host       호스트
+     * @param popupId    팝업 ID
      * @param requestDto 상품 등록 정보
      * @return 상품 정보
      */
@@ -55,9 +56,10 @@ public class ItemService {
 
     /**
      * 팝업 및 상태별 상품 목록 조회
-     * @param host 호스트
+     *
+     * @param host     호스트
      * @param pageable 페이징
-     * @param cond 조회 조건
+     * @param cond     조회 조건
      * @return 상품 목록
      */
     public Page<?> findAllItemsByPopupAndStatus(Host host, Pageable pageable, ItemCondition cond) {
@@ -67,7 +69,8 @@ public class ItemService {
 
     /**
      * 상품 상세 조회
-     * @param host 호스트
+     *
+     * @param host   호스트
      * @param itemId 상품 ID
      * @return 상품 상세정보
      */
@@ -77,27 +80,30 @@ public class ItemService {
 
     /**
      * 상품 수정
-     * @param itemId 상품 ID
+     *
+     * @param itemId     상품 ID
      * @param requestDto 상품 수정 정보
-     * @param host 호스트
+     * @param host       호스트
      * @return 상품 정보
      */
     @Transactional
     public ItemResponseDto updateItem(Long itemId, ItemRequestDto requestDto, Host host) {
 
-        // 굿즈명 중복 확인
-        duplicatedItemName(requestDto.getName());
-
         // 수정 권한 및 가능 여부 확인
         Item item = findItemByIdAndHost(itemId, host);
         item.checkPossibleUpdateStatus();
+
+        // 원래 상품 이름과 요청된 상품 이름이 다른 경우에만 중복 검사 수행
+        if (!item.getName().equals(requestDto.getName())) {
+            duplicatedItemName(requestDto.getName());
+        }
 
         String imageName = item.getImageName();
 
         // 상품 사진 변경 확인
         if (imageName.equals(requestDto.getImage().getOriginalFilename())) {
             item.update(requestDto);
-        }else {
+        } else {
             // 상품 사진 업로드
             ImageResponseDto image = imageService.uploadItemImage(requestDto.getImage());
 
@@ -127,8 +133,9 @@ public class ItemService {
 
     /**
      * 상품 찾기
+     *
      * @param itemId 상품 ID
-     * @param host 호스트
+     * @param host   호스트
      * @return 상품
      */
     private Item findItemByIdAndHost(Long itemId, Host host) {
@@ -138,6 +145,7 @@ public class ItemService {
 
     /**
      * 상품명 중복 체크
+     *
      * @param itemName 상품명
      */
     private void duplicatedItemName(String itemName) {

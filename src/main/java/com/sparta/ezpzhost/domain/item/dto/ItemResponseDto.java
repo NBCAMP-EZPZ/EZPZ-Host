@@ -14,6 +14,7 @@ public class ItemResponseDto {
     private final int likeCount;
     private final String imageUrl;
     private final String imageName;
+    private final String itemStatus;
 
     private ItemResponseDto(Item item) {
         this.id = item.getId();
@@ -24,6 +25,7 @@ public class ItemResponseDto {
         this.likeCount = item.getLikeCount();
         this.imageUrl = item.getImageUrl();
         this.imageName = item.getImageName();
+        this.itemStatus = item.getItemStatus().toString();
     }
 
     public static ItemResponseDto of(Item item) {
