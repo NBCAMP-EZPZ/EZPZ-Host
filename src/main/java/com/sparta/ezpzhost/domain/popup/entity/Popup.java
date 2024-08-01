@@ -8,23 +8,14 @@ import com.sparta.ezpzhost.domain.popup.dto.ImageResponseDto;
 import com.sparta.ezpzhost.domain.popup.dto.PopupRequestDto;
 import com.sparta.ezpzhost.domain.popup.enums.ApprovalStatus;
 import com.sparta.ezpzhost.domain.popup.enums.PopupStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import java.time.LocalDateTime;
-import java.util.List;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -70,8 +61,14 @@ public class Popup extends Timestamped {
     @Enumerated(EnumType.STRING)
     private ApprovalStatus approvalStatus;
 
-    @Column(name = "like_count")
+    @Column(name = "like_count", nullable = false)
     private int likeCount;
+
+    @Column(name = "review_count", nullable = false)
+    private int reviewCount;
+
+    @Column(name = "rating_avg", nullable = false)
+    private float ratingAvg;
 
     @Column(name = "start_date", nullable = false)
     private LocalDateTime startDate;
@@ -83,7 +80,7 @@ public class Popup extends Timestamped {
     private List<Image> imageList;
 
     private Popup(Host host, PopupRequestDto requestDto, ImageResponseDto thumbnail,
-            PopupStatus popupStatus, ApprovalStatus approvalStatus) {
+                  PopupStatus popupStatus, ApprovalStatus approvalStatus) {
         this.host = host;
         this.name = requestDto.getName();
         this.description = requestDto.getDescription();
@@ -101,7 +98,7 @@ public class Popup extends Timestamped {
     }
 
     public static Popup of(Host host, PopupRequestDto requestDto, ImageResponseDto thumbnail,
-            PopupStatus popupStatus, ApprovalStatus approvalStatus) {
+                           PopupStatus popupStatus, ApprovalStatus approvalStatus) {
         return new Popup(host, requestDto, thumbnail, popupStatus, approvalStatus);
     }
 
@@ -168,4 +165,5 @@ public class Popup extends Timestamped {
             throw new CustomException(ErrorType.ITEM_REGISTRATION_IMPOSSIBLE);
         }
     }
+
 }
