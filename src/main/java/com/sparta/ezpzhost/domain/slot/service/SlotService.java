@@ -1,7 +1,6 @@
 package com.sparta.ezpzhost.domain.slot.service;
 
 import com.sparta.ezpzhost.common.exception.CustomException;
-import com.sparta.ezpzhost.common.exception.ErrorType;
 import com.sparta.ezpzhost.common.lock.DistributedLock;
 import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
@@ -26,6 +25,7 @@ import java.time.chrono.ChronoLocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.sparta.ezpzhost.common.exception.ErrorType.*;
 import static com.sparta.ezpzhost.common.util.PageUtil.validatePageableWithPage;
 
 @Service
@@ -44,10 +44,40 @@ public class SlotService {
      * @param host       로그인 사용자 정보
      * @return 생성된 슬롯 리스트
      */
-    @DistributedLock(key = "'createSlot'.concat(#popupId)")
+    @DistributedLock(key = "'createSlot_popupId_'.concat(#popupId)")
     public List<SlotResponseDto> createSlot(Long popupId, SlotRequestDto requestDto, Host host) {
-        Popup popup = validatePopup(popupId, host.getId());
-        existPopupSlot(popupId);
+        Popup popup = getApprovedPopup(popupId, host.getId());
+        validateDuplicateSlot(popupId);
+
+        LocalDate startDate = requestDto.getStartDate();
+        LocalDate endDate = requestDto.getEndDate();
+        LocalTime startTime = requestDto.getStartTime();
+        LocalTime endTime = requestDto.getEndTime();
+        int availableCount = requestDto.getAvailableCount();
+        int totalCount = requestDto.getTotalCount();
+
+        validateDateTime(requestDto, popup);
+
+        List<Slot> slotList = new ArrayList<>();
+
+        // 예약 가능한 슬롯 생성
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            for (LocalTime time = startTime; !time.isAfter(endTime); time = time.plusHours(1)) {
+                Slot slot = Slot.of(SlotCreateDto.of(date, time, availableCount, totalCount, popup));
+                slotList.add(slot);
+            }
+        }
+
+        slotRepository.saveAll(slotList);
+
+        return SlotResponseDto.listOf(slotList);
+    }
+
+    // 분산락 미적용 테스트 서비스
+    @Transactional
+    public List<SlotResponseDto> createSlotWithoutLock(Long popupId, SlotRequestDto requestDto, Host host) {
+        Popup popup = getApprovedPopup(popupId, host.getId());
+        validateDuplicateSlot(popupId);
 
         LocalDate startDate = requestDto.getStartDate();
         LocalDate endDate = requestDto.getEndDate();
@@ -83,7 +113,7 @@ public class SlotService {
      */
     @Transactional(readOnly = true)
     public Page<SlotResponseListDto> findSlots(Long popupId, Pageable pageable, Host host) {
-        validatePopup(popupId, host.getId());
+        getApprovedPopup(popupId, host.getId());
         Page<Slot> slotList = slotRepository.findByPopupId(popupId, pageable);
         validatePageableWithPage(pageable, slotList);
 
@@ -100,12 +130,12 @@ public class SlotService {
      */
     @Transactional(readOnly = true)
     public List<ReservationListDto> findSlot(Long popupId, Long slotId, Host host) {
-        validatePopup(popupId, host.getId());
+        getApprovedPopup(popupId, host.getId());
 
         List<Reservation> reservationList = reservationRepository.findBySlotIdAndReservationStatus(slotId, ReservationStatus.READY);
 
         if (reservationList.isEmpty()) {
-            throw new CustomException(ErrorType.RESERVATION_NOT_FOUND);
+            throw new CustomException(RESERVATION_NOT_FOUND);
         }
 
         return ReservationListDto.listOf(reservationList);
@@ -122,7 +152,7 @@ public class SlotService {
      */
     @Transactional
     public SlotResponseDto updateSlot(Long popupId, Long slotId, SlotUpdateDto requestDto, Host host) {
-        validatePopup(popupId, host.getId());
+        getApprovedPopup(popupId, host.getId());
         Slot slot = getSlot(popupId, slotId);
 
         slot.update(requestDto);
@@ -139,7 +169,7 @@ public class SlotService {
      */
     @Transactional
     public void deleteSlot(Long popupId, Long slotId, Host host) {
-        validatePopup(popupId, host.getId());
+        getApprovedPopup(popupId, host.getId());
         Slot slot = getSlot(popupId, slotId);
 
         slotRepository.delete(slot);
@@ -157,12 +187,12 @@ public class SlotService {
      * @param hostId  호스트 ID
      * @return 팝업
      */
-    private Popup validatePopup(Long popupId, Long hostId) {
+    private Popup getApprovedPopup(Long popupId, Long hostId) {
         Popup popup = popupRepository.findByIdAndHostId(popupId, hostId)
-                .orElseThrow(() -> new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN));
+                .orElseThrow(() -> new CustomException(POPUP_ACCESS_FORBIDDEN));
 
         if (!popup.getApprovalStatus().equals(ApprovalStatus.APPROVED)) {
-            throw new CustomException(ErrorType.POPUP_NOT_APPROVAL);
+            throw new CustomException(POPUP_NOT_APPROVAL);
         }
 
         return popup;
@@ -173,25 +203,24 @@ public class SlotService {
      *
      * @param popupId 팝업 ID
      */
-    private void existPopupSlot(Long popupId) {
+    private void validateDuplicateSlot(Long popupId) {
         if (slotRepository.existsByPopupId(popupId)) {
-            // 이미 슬롯이 생성된 팝업인 경우
-            throw new CustomException(ErrorType.SLOT_ALREADY_EXISTS);
+            throw new CustomException(SLOT_ALREADY_EXISTS);
         }
     }
 
     /**
      * 예약 가능한 날짜, 시간 확인
      *
-     * @param requestDto 슬롯 생성 요청 DTO
-     * @param popup      팝업
+     * @param dto   슬롯 생성 요청 DTO
+     * @param popup 팝업
      */
-    private void validateDateTime(SlotRequestDto requestDto, Popup popup) {
-        if (requestDto.getStartDate().isBefore(ChronoLocalDate.from(popup.getStartDate()))
-                || requestDto.getEndDate().isAfter(ChronoLocalDate.from(popup.getEndDate()))
-                || requestDto.getStartDate().isAfter(requestDto.getEndDate())
-                || requestDto.getStartTime().isAfter(requestDto.getEndTime())) {
-            throw new CustomException(ErrorType.INVALID_DATE_TIME);
+    private void validateDateTime(SlotRequestDto dto, Popup popup) {
+        if (dto.getStartDate().isBefore(ChronoLocalDate.from(popup.getStartDate()))
+                || dto.getEndDate().isAfter(ChronoLocalDate.from(popup.getEndDate()))
+                || dto.getStartDate().isAfter(dto.getEndDate())
+                || dto.getStartTime().isAfter(dto.getEndTime())) {
+            throw new CustomException(INVALID_DATE_TIME);
         }
     }
 
@@ -204,7 +233,7 @@ public class SlotService {
      */
     private Slot getSlot(Long popupId, Long slotId) {
         return slotRepository.findByIdAndPopupId(slotId, popupId)
-                .orElseThrow(() -> new CustomException(ErrorType.SLOT_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(SLOT_NOT_FOUND));
     }
 
 }
