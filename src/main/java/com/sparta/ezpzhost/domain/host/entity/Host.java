@@ -2,11 +2,7 @@ package com.sparta.ezpzhost.domain.host.entity;
 
 import com.sparta.ezpzhost.common.entity.Timestamped;
 import com.sparta.ezpzhost.domain.host.dto.SignupRequestDto;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +16,7 @@ public class Host extends Timestamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "host_id", nullable = false, unique = true)
+    @Column(name = "host_id")
     private Long id;
 
     private String username;
@@ -44,4 +40,14 @@ public class Host extends Timestamped {
     public static Host of(SignupRequestDto dto, String encodedPassword) {
         return new Host(dto, encodedPassword);
     }
+
+    // 동시성 테스트용 생성자
+    private Host(String username) {
+        this.username = username;
+    }
+
+    public static Host createMockHost(String username) {
+        return new Host(username);
+    }
+
 }
