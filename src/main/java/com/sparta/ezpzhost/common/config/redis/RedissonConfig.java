@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RedissonConfig {
 
-    private final static String REDIS_URL_PREFIX = "redis://";
+    private final static String REDIS_URL_PREFIX = "rediss://";
 
     private final RedisClusterProperties properties;
 
