@@ -1,0 +1,127 @@
+name: CD
+
+# main 브랜치 PR 발생 시 실행
+on:
+  pull_request:
+    branches:
+      - main
+
+# 환경변수
+env:
+  ECR_URL: ${{secrets.ECR_URL}}
+
+jobs:
+  # develop 브랜치 체크
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      # 브랜치 이동
+      - name: branch checkout
+        uses: actions/checkout@v4
+
+      # PR 올린 브랜치가 develop 브랜치인지 검증
+      - name: verity target branch
+        run: |
+          if [ "${{github.head_ref}}" != "develop" ]; then
+            echo "develop 브랜치만 main 브랜치에 PR 가능"
+            exit 1
+          fi
+
+  # main 브랜치에 merge
+  merge:
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - name: change main branch
+        uses: actions/checkout@v4
+        with:
+          ref: 'main'
+          fetch-depth: '0'
+
+      # main 브랜치에 develop 브랜치를 merge, main 브랜치 push
+      - name: merge the dev into the main and push changes
+        run: |
+          git merge origin/develop --no-edit
+          git push origin main
+        env:
+          github_token: ${{ secrets.REPO_KEY }}
+
+  # 배포
+  deploy:
+    runs-on: ubuntu-latest
+    needs: merge
+
+    steps:
+      # main 브랜치 체크아웃
+      - name: checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: 'main'
+          fetch-depth: '0'
+
+      # JDK 17 설치
+      - name: JDK 17 setup
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: "adopt"
+
+      # gradlew 실행 권한 부여
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # build
+      - name: Build with Gradle Wrapper
+        run: ./gradlew build
+
+      # Docker 이미지 생성
+      - name: Docker build
+        run: docker build . --platform linux/amd64 -f docker/Dockerfile -t ezpz-host:latest
+
+      # AWS CLI 설치
+      - name: AWS-cli setup
+        run: |
+          sudo apt install unzip
+          sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          sudo unzip awscliv2.zip
+          sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
+
+      # AWS 연결설정
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY}}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY}}
+          aws-region: ${{ secrets.AWS_REGION}}
+
+      # ECR login
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # Docker image upload
+      - name: AWS ECR upload
+        id: build-image
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
+          docker tag ezpz-host:latest ${{ env.ECR_URL }}:latest
+          docker push ${{ env.ECR_URL }}:latest 
+          echo "image= ${{ env.ECR_URL }}:latest" >> $GITHUB_OUTPUT
+
+#      # ECS task definition 생성
+#      - name: Fill in the new image ID in the Amazon ECS task definition
+#        id: task-def
+#        uses: aws-actions/amazon-ecs-render-task-definition@v1
+#        with:
+#          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+#          container-name: ${{ env.CONTAINER_NAME }}
+#          image: ${{ steps.build-image.outputs.image }}
+#
+#      # ECS 배포
+#      - name: Deploy Amazon ECS task definition
+#        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+#        with:
+#          task-definition: ${{ steps.task-def.outputs.task-definition }}
+#          service: ${{ env.ECS_SERVICE }}
+#          cluster: ${{ env.ECS_CLUSTER }}
+#          wait-for-service-stability: true
