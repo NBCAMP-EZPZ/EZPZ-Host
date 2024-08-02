@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -28,57 +29,46 @@ public class Popup extends Timestamped {
     @Column(name = "popup_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "host_id", nullable = false)
-    private Host host;
-
-    @Column(nullable = false, unique = true)
     private String name;
 
-    @Column(nullable = false)
     private String description;
 
-    @Column(name = "thumbnail_url", nullable = false)
     private String thumbnailUrl;
 
-    @Column(name = "thumbnail_name", nullable = false)
     private String thumbnailName;
 
-    @Column(nullable = false)
     private String address;
 
-    @Column(name = "manager_name", nullable = false)
     private String managerName;
 
-    @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-    @Column(name = "popup_status", nullable = false)
+    private int likeCount;
+
+    private int reviewCount;
+
+    private double ratingAvg;
+
+    private LocalDateTime startDate;
+
+    private LocalDateTime endDate;
+
     @Enumerated(EnumType.STRING)
     private PopupStatus popupStatus;
 
-    @Column(name = "approval_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private ApprovalStatus approvalStatus;
 
-    @Column(name = "like_count", nullable = false)
-    private int likeCount;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "host_id")
+    private Host host;
 
-    @Column(name = "review_count", nullable = false)
-    private int reviewCount;
+    @OneToMany(mappedBy = "popup", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> imageList = new ArrayList<>();
 
-    @Column(name = "rating_avg", nullable = false)
-    private float ratingAvg;
-
-    @Column(name = "start_date", nullable = false)
-    private LocalDateTime startDate;
-
-    @Column(name = "end_date", nullable = false)
-    private LocalDateTime endDate;
-
-    @OneToMany(mappedBy = "popup")
-    private List<Image> imageList;
-
+    /**
+     * 생성자
+     */
     private Popup(Host host, PopupRequestDto requestDto, ImageResponseDto thumbnail,
                   PopupStatus popupStatus, ApprovalStatus approvalStatus) {
         this.host = host;
@@ -90,7 +80,6 @@ public class Popup extends Timestamped {
         this.likeCount = 0;
         this.startDate = requestDto.getStartDate();
         this.endDate = requestDto.getEndDate();
-
         this.thumbnailUrl = thumbnail.getUrl();
         this.thumbnailName = thumbnail.getName();
         this.popupStatus = popupStatus;
@@ -100,6 +89,18 @@ public class Popup extends Timestamped {
     public static Popup of(Host host, PopupRequestDto requestDto, ImageResponseDto thumbnail,
                            PopupStatus popupStatus, ApprovalStatus approvalStatus) {
         return new Popup(host, requestDto, thumbnail, popupStatus, approvalStatus);
+    }
+
+    // 동시성 테스트용 생성자
+    private Popup(Host host, LocalDateTime startDate, LocalDateTime endDate) {
+        this.host = host;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.approvalStatus = ApprovalStatus.APPROVED;
+    }
+
+    public static Popup createMockPopup(Host host, LocalDateTime startDate, LocalDateTime endDate) {
+        return new Popup(host, startDate, endDate);
     }
 
     /**
