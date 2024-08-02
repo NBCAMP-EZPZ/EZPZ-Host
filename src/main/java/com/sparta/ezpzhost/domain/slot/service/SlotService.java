@@ -44,7 +44,7 @@ public class SlotService {
      * @param host       로그인 사용자 정보
      * @return 생성된 슬롯 리스트
      */
-    @DistributedLock(key = "'createSlot_popupId_'.concat(#popupId)")
+    @DistributedLock(key = "'createSlot-popupId-'.concat(#popupId)")
     public List<SlotResponseDto> createSlot(Long popupId, SlotRequestDto requestDto, Host host) {
         Popup popup = getApprovedPopup(popupId, host.getId());
         validateDuplicateSlot(popupId);

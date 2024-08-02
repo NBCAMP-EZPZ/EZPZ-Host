@@ -37,7 +37,7 @@ public class PopupService {
      * @param hostId 개최자 ID
      * @return 팝업 정보
      */
-    @DistributedLock(key = "'createPopup-hostId'.concat(#hostId)")
+    @DistributedLock(key = "'createPopup-hostId-'.concat(#hostId)")
     public PopupResponseDto createPopup(PopupRequestDto dto, Host host, Long hostId) {
         // 팝업명 중복 체크
         duplicatedPopupName(dto.getName());
@@ -96,7 +96,7 @@ public class PopupService {
      * @param host       호스트
      * @return 팝업 정보
      */
-    @DistributedLock(key = "'updatePopup-popupId'.concat(#popupId)")
+    @DistributedLock(key = "'updatePopup-popupId-'.concat(#popupId)")
     public PopupResponseDto updatePopup(Long popupId, PopupRequestDto requestDto, Host host) {
 
         // 팝업 권한 및 수정 가능 여부 확인
@@ -161,7 +161,7 @@ public class PopupService {
      * @param popupId 팝업 ID
      * @param host    호스트
      */
-    @DistributedLock(key = "'cancelPopup-popupId'.concat(#popupId)")
+    @DistributedLock(key = "'cancelPopup-popupId-'.concat(#popupId)")
     public void cancelPopup(Long popupId, Host host) {
         Popup popup = findPopupByIdAndHostId(popupId, host.getId());
         popup.checkCancellationPossible();

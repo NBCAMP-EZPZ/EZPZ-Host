@@ -36,7 +36,7 @@ public class ItemService {
      * @param requestDto 상품 등록 정보
      * @return 상품 정보
      */
-    @DistributedLock(key = "'createItem-popupId_'.concat(#popupId)")
+    @DistributedLock(key = "'createItem-popupId-'.concat(#popupId)")
     public ItemResponseDto createItem(Host host, Long popupId, ItemRequestDto requestDto) {
         // 굿즈명 중복 체크
         duplicatedItemName(requestDto.getName());
@@ -89,7 +89,7 @@ public class ItemService {
      * @param host       호스트
      * @return 상품 정보
      */
-    @DistributedLock(key = "'updateItem-itemId'.concat(#itemId)")
+    @DistributedLock(key = "'updateItem-itemId-'.concat(#itemId)")
     public ItemResponseDto updateItem(Long itemId, ItemRequestDto requestDto, Host host) {
 
         // 수정 권한 및 가능 여부 확인
@@ -126,7 +126,7 @@ public class ItemService {
      * @param itemStatus 상품 상태
      * @param host       호스트
      */
-    @DistributedLock(key = "'changeItemStatus-itemId'.concat(#itemId)")
+    @DistributedLock(key = "'changeItemStatus-itemId-'.concat(#itemId)")
     public void changeItemStatus(Long itemId, String itemStatus, Host host) {
         Item item = findItemByIdAndHost(itemId, host);
         item.changeItemStatus(itemStatus);
