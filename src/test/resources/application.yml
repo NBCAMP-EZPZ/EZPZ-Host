@@ -25,10 +25,20 @@ spring:
   data:
     redis:
       mode: standalone  # 테스트에서는 로컬 Redis 사용
+      cluster:
+        max-redirects: 3
+        connect-ip: ${CLUSTER_CONNECT_IP}
+        nodes:
+          - ${CLUSTER_NODE_1}
+          - ${CLUSTER_NODE_2}
+          - ${CLUSTER_NODE_3}
+          - ${CLUSTER_NODE_4}
+          - ${CLUSTER_NODE_5}
+          - ${CLUSTER_NODE_6}
 
 logging.level:
   org.hibernate.SQL: debug  # Hibernate SQL 쿼리를 debug 레벨로 설정하여 로깅합니다.
-  org.hibernate.orm.jdbc.bind: trace  # 스프링 부트 3.x, Hibernate 6.x에서 JDBC 바인딩을 trace 레벨로 설정합니다.
+#  org.hibernate.orm.jdbc.bind: trace  # 스프링 부트 3.x, Hibernate 6.x에서 JDBC 바인딩을 trace 레벨로 설정합니다.
 
 jwt:
   secret:

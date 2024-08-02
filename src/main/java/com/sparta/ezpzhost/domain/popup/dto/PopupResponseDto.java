@@ -38,11 +38,11 @@ public class PopupResponseDto {
         this.likeCount = popup.getLikeCount();
         this.startDate = popup.getStartDate();
         this.endDate = popup.getEndDate();
-
         this.images = images;
     }
 
     public static PopupResponseDto of(Popup popup, List<ImageResponseDto> images) {
         return new PopupResponseDto(popup, images);
     }
+    
 }
