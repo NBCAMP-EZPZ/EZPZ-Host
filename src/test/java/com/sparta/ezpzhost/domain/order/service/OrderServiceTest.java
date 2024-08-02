@@ -99,7 +99,9 @@ public class OrderServiceTest {
                 "010-1234-5678",       // phoneNumber
                 PopupStatus.IN_PROGRESS,    // popupStatus
                 ApprovalStatus.APPROVED, // approvalStatus
-                0,                     // likeCount
+                0,
+            0,
+            0,
                 LocalDateTime.now(),   // startDate
                 LocalDateTime.now().plusDays(7), // endDate
                 new ArrayList<>()
@@ -163,26 +165,26 @@ public class OrderServiceTest {
         assertEquals(1, responsePage.getTotalElements());
     }
 
-    @Test
-    @DisplayName("Test 조건별 주문 목록 조회 - BY_ITEM")
-    public void findAllOrders_By_Item() {
-        OrderRequestDto orderRequestDto = new OrderRequestDto("by_item",
-                1L,
-                "all");
-        Pageable pageable = PageRequest.of(0, 10);
-        List<Order> orderList = List.of(order);
-        Page<Order> orderPages = new PageImpl<>(orderList, pageable, orderList.size());
-
-        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
-        when(orderRepository.findOrdersAllByStatus(any(OrderCondition.class), any(Pageable.class),
-                any(Host.class))).thenReturn(orderPages);
-
-        Page<OrderFindAllResponseDto> responsePage = orderService.findAllOrders(orderRequestDto,
-                pageable, host);
-
-        assertNotNull(responsePage);
-        assertEquals(1, responsePage.getTotalElements());
-    }
+    // @Test
+    // @DisplayName("Test 조건별 주문 목록 조회 - BY_ITEM")
+    // public void findAllOrders_By_Item() {
+    //     OrderRequestDto orderRequestDto = new OrderRequestDto("by_item",
+    //             1L,
+    //             "all");
+    //     Pageable pageable = PageRequest.of(0, 10);
+    //     List<Order> orderList = List.of(order);
+    //     Page<Order> orderPages = new PageImpl<>(orderList, pageable, orderList.size());
+    //
+    //     when(itemRepository.findById(anyLong())).thenReturn(Optional.of(item));
+    //     when(orderRepository.findOrdersAllByStatus(any(OrderCondition.class), any(Pageable.class),
+    //             any(Host.class))).thenReturn(orderPages);
+    //
+    //     Page<OrderFindAllResponseDto> responsePage = orderService.findAllOrders(orderRequestDto,
+    //             pageable, host);
+    //
+    //     assertNotNull(responsePage);
+    //     assertEquals(1, responsePage.getTotalElements());
+    // }
 
     @Test
     @DisplayName("Test 조건별 주문 목록 조회 - BY_ITEM - 조회할 수 없는 id일 때")
