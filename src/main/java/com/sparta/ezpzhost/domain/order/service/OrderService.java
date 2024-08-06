@@ -50,9 +50,6 @@ public class OrderService {
             if (item.isEmpty()) {
                 throw new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN);
             }
-//            if (!item.getPopup().getHost().getId().equals(host.getId())) {
-//                throw new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN);
-//            }
         }
         Page<Order> orderPages = orderRepository.findOrdersAllByStatus(cond, pageable, host);
         PageUtil.validatePageableWithPage(pageable, orderPages);
