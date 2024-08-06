@@ -2,10 +2,12 @@ package com.sparta.ezpzhost.common.config;
 
 import com.sparta.ezpzhost.domain.item.entity.Item;
 import com.sparta.ezpzhost.domain.item.repository.ItemRepository;
+import com.sparta.ezpzhost.domain.order.repository.OrderRepository;
 import com.sparta.ezpzhost.domain.salesStatistics.entity.MonthlySalesStatistics;
 import com.sparta.ezpzhost.domain.salesStatistics.entity.RecentMonthSalesStatistics;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Map;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,7 @@ public class JobConfig {
 
     private final DataSource dataSource;
     private final ItemRepository itemRepository;
+    private final OrderRepository orderRepository;
 
     @Bean
     public Job salesStatisticsJob(JobRepository jobRepository, Step monthlySalesStep,
@@ -87,11 +90,12 @@ public class JobConfig {
             Item item = itemRepository.findById(itemId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid item ID: " + itemId));
 
-            String month = resultMap.get("year") + "-" + resultMap.get("month");
+            int year = ((Number) resultMap.get("year")).intValue();
+            int month = ((Number) resultMap.get("month")).intValue();
             int totalSalesAmount = ((Number) resultMap.get("total_sales_amount")).intValue();
             int totalSalesCount = ((Number) resultMap.get("total_sales_count")).intValue();
 
-            return MonthlySalesStatistics.of(item, month, totalSalesAmount, totalSalesCount);
+            return MonthlySalesStatistics.of(item, year, month, totalSalesAmount, totalSalesCount);
         };
     }
 
@@ -99,20 +103,22 @@ public class JobConfig {
     public JdbcBatchItemWriter<MonthlySalesStatistics> monthlySalesWriter() {
         return new JdbcBatchItemWriterBuilder<MonthlySalesStatistics>()
                 .dataSource(dataSource)
-                .sql("INSERT INTO monthly_sales_statistics (item_id, month, total_sales_amount, total_sales_count) VALUES (?, ?, ?, ?)")
+                .sql("INSERT INTO monthly_sales_statistics (item_id, year, month, total_sales_amount, total_sales_count) VALUES (?, ?, ?, ?, ?)")
                 .itemPreparedStatementSetter( // 객체를 SQL 문의 매개변수로 설정하는 방법을 정의
                         new ItemPreparedStatementSetter<MonthlySalesStatistics>() {
                             @Override
                             public void setValues(MonthlySalesStatistics item, PreparedStatement ps)
                                     throws SQLException {
                                 ps.setLong(1, item.getItem().getId());
-                                ps.setString(2, item.getMonth());
-                                ps.setInt(3, item.getTotalSalesAmount());
-                                ps.setInt(4, item.getTotalSalesCount());
+                                ps.setInt(2, item.getYear());
+                                ps.setInt(3, item.getMonth());
+                                ps.setInt(4, item.getTotalSalesAmount());
+                                ps.setInt(5, item.getTotalSalesCount());
                             }
                         })
                 .build();
     }
+
 
     @Bean
     public JdbcCursorItemReader<Map<String, Object>> recentMonthSalesReader() {
@@ -159,5 +165,16 @@ public class JobConfig {
                             }
                         })
                 .build();
+    }
+
+    public boolean isDataChanged() {
+        // 데이터 변경 여부를 확인하는 로직
+        return orderRepository.existsByModifiedAtAfter(getLastJobExecutionTime()) ||
+                itemRepository.existsByModifiedAtAfter(getLastJobExecutionTime());
+    }
+
+    private LocalDateTime getLastJobExecutionTime() {
+        // 마지막으로 성공한 배치 작업의 실행 시간을 반환
+        return LocalDateTime.now().minusDays(1);
     }
 }

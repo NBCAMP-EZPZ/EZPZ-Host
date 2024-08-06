@@ -31,8 +31,11 @@ public class SalesStatisticsController {
     }
 
     @GetMapping("/recent-month")
-    public ResponseEntity<CommonResponse<?>> getRecentMonthSalesStatistics() {
-        return getResponseEntity(salesStatisticsService.getRecentMonthSalesStatistics(),
+    public ResponseEntity<CommonResponse<?>> getRecentMonthSalesStatistics(
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        return getResponseEntity(
+                salesStatisticsService.getRecentMonthSalesStatistics(userDetails.getHost()),
                 "최근 30일 간 매출 조회 성공");
     }
 }

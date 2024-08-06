@@ -1,8 +1,10 @@
 package com.sparta.ezpzhost.common.batch;
 
+import com.sparta.ezpzhost.common.config.JobConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,13 +17,21 @@ public class BatchScheduler {
 
     private final JobLauncher jobLauncher;
     private final Job salesStatisticsJob;
+    private final JobConfig jobConfig;
 
-    @Scheduled(cron = "0 1 17 * * ?") // 매일 오후 12시 58분에 실행
+    @Scheduled(cron = "0 41 21 * * ?") // 매일 오후 12시 58분에 실행
     public void runSalesStatisticsJob() {
-        try {
-            jobLauncher.run(salesStatisticsJob, new JobParameters());
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (jobConfig.isDataChanged()) {
+            try {
+                JobParameters jobParameters = new JobParametersBuilder()
+                        .addLong("run.id", System.currentTimeMillis()) // 매번 다른 값을 추가하여 고유하게 설정
+                        .toJobParameters();
+                jobLauncher.run(salesStatisticsJob, jobParameters);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("No data changes detected. Job execution skipped.");
         }
     }
 }

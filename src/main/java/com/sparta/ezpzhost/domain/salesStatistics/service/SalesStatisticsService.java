@@ -29,7 +29,7 @@ public class SalesStatisticsService {
         return monthlySalesStatistics.map(MonthlySalesStatisticsResponseDto::of);
     }
 
-    public List<RecentMonthSalesStatistics> getRecentMonthSalesStatistics() {
+    public List<RecentMonthSalesStatistics> getRecentMonthSalesStatistics(Host host) {
         return recentMonthSalesStatisticsRepository.findAll();
     }
 }

@@ -25,20 +25,22 @@ public class MonthlySalesStatistics {
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
-    private String month;
+    private int year;
+    private int month;
     private int totalSalesAmount;
     private int totalSalesCount;
 
-    private MonthlySalesStatistics(Item item, String month, int totalSalesAmount,
+    private MonthlySalesStatistics(Item item, int year, int month, int totalSalesAmount,
             int totalSalesCount) {
         this.item = item;
+        this.year = year;
         this.month = month;
         this.totalSalesAmount = totalSalesAmount;
         this.totalSalesCount = totalSalesCount;
     }
 
-    public static MonthlySalesStatistics of(Item item, String month, int totalSalesAmount,
+    public static MonthlySalesStatistics of(Item item, int year, int month, int totalSalesAmount,
             int totalSalesCount) {
-        return new MonthlySalesStatistics(item, month, totalSalesAmount, totalSalesCount);
+        return new MonthlySalesStatistics(item, year, month, totalSalesAmount, totalSalesCount);
     }
 }
