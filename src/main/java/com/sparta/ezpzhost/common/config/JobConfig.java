@@ -30,7 +30,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @RequiredArgsConstructor
-//@EnableBatchProcessing
 public class JobConfig {
 
     private final DataSource dataSource;
@@ -103,8 +102,8 @@ public class JobConfig {
     public JdbcBatchItemWriter<MonthlySalesStatistics> monthlySalesWriter() {
         return new JdbcBatchItemWriterBuilder<MonthlySalesStatistics>()
                 .dataSource(dataSource)
-                .sql("INSERT INTO monthly_sales_statistics (item_id, year, month, total_sales_amount, total_sales_count) VALUES (?, ?, ?, ?, ?)")
-                .itemPreparedStatementSetter( // 객체를 SQL 문의 매개변수로 설정하는 방법을 정의
+                .sql("INSERT INTO monthly_sales_statistics (item_id, year, month, total_sales_amount, total_sales_count) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE total_sales_amount = VALUES(total_sales_amount), total_sales_count = VALUES(total_sales_count)")
+                .itemPreparedStatementSetter(
                         new ItemPreparedStatementSetter<MonthlySalesStatistics>() {
                             @Override
                             public void setValues(MonthlySalesStatistics item, PreparedStatement ps)
@@ -153,7 +152,7 @@ public class JobConfig {
     public JdbcBatchItemWriter<RecentMonthSalesStatistics> recentMonthSalesWriter() {
         return new JdbcBatchItemWriterBuilder<RecentMonthSalesStatistics>()
                 .dataSource(dataSource)
-                .sql("INSERT INTO recent_month_sales_statistics (item_id, total_sales_amount, total_sales_count) VALUES (?, ?, ?)")
+                .sql("INSERT INTO recent_month_sales_statistics (item_id, total_sales_amount, total_sales_count) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE total_sales_amount = VALUES(total_sales_amount), total_sales_count = VALUES(total_sales_count)")
                 .itemPreparedStatementSetter(
                         new ItemPreparedStatementSetter<RecentMonthSalesStatistics>() {
                             @Override
