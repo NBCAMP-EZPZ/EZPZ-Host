@@ -22,9 +22,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SalesStatisticsService {
@@ -84,7 +87,7 @@ public class SalesStatisticsService {
         return jobExplorer.getJobInstances("salesStatisticsJob", 0, 1)
                 .stream()
                 .flatMap(jobInstance -> jobExplorer.getJobExecutions(jobInstance).stream())
-                .filter(jobExecution -> jobExecution.getStatus().isUnsuccessful())
+                .filter(jobExecution -> jobExecution.getStatus() == BatchStatus.COMPLETED)
                 .map(jobExecution -> Optional.ofNullable(jobExecution.getEndTime())
                         .map(endTime -> ((LocalDateTime) endTime).toInstant(ZoneOffset.UTC)
                                 .atZone(ZoneOffset.UTC).toLocalDateTime())
@@ -106,11 +109,12 @@ public class SalesStatisticsService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN));
 
-        int salesAmount = recentOrderLines.stream().mapToInt(Orderline::getOrderPrice)
-                .sum();
+        int salesAmount = recentOrderLines.stream().mapToInt(Orderline::getOrderPrice).sum();
         int salesCount = recentOrderLines.stream().mapToInt(Orderline::getQuantity).sum();
 
         MonthlySalesStatistics newMonthlySalesStatistics;
+
+        LinkedList<MonthlySalesStatistics> updatedStatisticsList = new LinkedList<>(statisticsList);
 
         if (monthlySalesStatistics.isEmpty()) {
             newMonthlySalesStatistics = MonthlySalesStatistics.of(item, currentYear, currentMonth,
@@ -120,10 +124,9 @@ public class SalesStatisticsService {
                     salesAmount + monthlySalesStatistics.get().getTotalSalesAmount(),
                     salesCount + monthlySalesStatistics.get()
                             .getTotalSalesCount());
+            updatedStatisticsList.removeFirst();
         }
 
-        // Create a new LinkedList and add the new statistics at the front
-        LinkedList<MonthlySalesStatistics> updatedStatisticsList = new LinkedList<>(statisticsList);
         updatedStatisticsList.addFirst(newMonthlySalesStatistics);
 
         return updatedStatisticsList;
