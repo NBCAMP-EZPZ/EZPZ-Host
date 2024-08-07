@@ -19,7 +19,7 @@ public class BatchScheduler {
     private final Job salesStatisticsJob;
     private final JobConfig jobConfig;
 
-    @Scheduled(cron = "0 25 1 * * ?") // 매일 오후 12시 58분에 실행
+    @Scheduled(cron = "0 3 19 * * ?") // 매일 오후 12시 58분에 실행
     public void runSalesStatisticsJob() {
         if (jobConfig.isDataChanged()) {
             try {

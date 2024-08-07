@@ -27,20 +27,16 @@ public class MonthlySalesStatistics {
 
     private int year;
     private int month;
-    private int totalSalesAmount;
     private int totalSalesCount;
 
-    private MonthlySalesStatistics(Item item, int year, int month, int totalSalesAmount,
-            int totalSalesCount) {
+    private MonthlySalesStatistics(Item item, int year, int month, int totalSalesCount) {
         this.item = item;
         this.year = year;
         this.month = month;
-        this.totalSalesAmount = totalSalesAmount;
         this.totalSalesCount = totalSalesCount;
     }
 
-    public static MonthlySalesStatistics of(Item item, int year, int month, int totalSalesAmount,
-            int totalSalesCount) {
-        return new MonthlySalesStatistics(item, year, month, totalSalesAmount, totalSalesCount);
+    public static MonthlySalesStatistics of(Item item, int year, int month, int totalSalesCount) {
+        return new MonthlySalesStatistics(item, year, month, totalSalesCount);
     }
 }

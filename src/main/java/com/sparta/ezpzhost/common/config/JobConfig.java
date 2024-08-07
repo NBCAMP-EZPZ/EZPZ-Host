@@ -73,7 +73,7 @@ public class JobConfig {
         return new JdbcCursorItemReaderBuilder<Map<String, Object>>()
                 .dataSource(dataSource)
                 .name("monthlySalesReader")
-                .sql("SELECT item_id, YEAR(orders.modified_at) AS year, MONTH(orders.modified_at) AS month, SUM(orderline.order_price) AS total_sales_amount, SUM(orderline.quantity) AS total_sales_count "
+                .sql("SELECT item_id, YEAR(orders.modified_at) AS year, MONTH(orders.modified_at) AS month, SUM(orderline.quantity) AS total_sales_count "
                         +
                         "FROM orderline JOIN orders ON orderline.order_id = orders.order_id " +
                         "WHERE orders.order_status = 'ORDER_COMPLETED' " +
@@ -91,10 +91,9 @@ public class JobConfig {
 
             int year = ((Number) resultMap.get("year")).intValue();
             int month = ((Number) resultMap.get("month")).intValue();
-            int totalSalesAmount = ((Number) resultMap.get("total_sales_amount")).intValue();
             int totalSalesCount = ((Number) resultMap.get("total_sales_count")).intValue();
 
-            return MonthlySalesStatistics.of(item, year, month, totalSalesAmount, totalSalesCount);
+            return MonthlySalesStatistics.of(item, year, month, totalSalesCount);
         };
     }
 
@@ -102,7 +101,7 @@ public class JobConfig {
     public JdbcBatchItemWriter<MonthlySalesStatistics> monthlySalesWriter() {
         return new JdbcBatchItemWriterBuilder<MonthlySalesStatistics>()
                 .dataSource(dataSource)
-                .sql("INSERT INTO monthly_sales_statistics (item_id, year, month, total_sales_amount, total_sales_count) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE total_sales_amount = VALUES(total_sales_amount), total_sales_count = VALUES(total_sales_count)")
+                .sql("INSERT INTO monthly_sales_statistics (item_id, year, month, total_sales_count) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE total_sales_count = VALUES(total_sales_count)")
                 .itemPreparedStatementSetter(
                         new ItemPreparedStatementSetter<MonthlySalesStatistics>() {
                             @Override
@@ -111,8 +110,7 @@ public class JobConfig {
                                 ps.setLong(1, item.getItem().getId());
                                 ps.setInt(2, item.getYear());
                                 ps.setInt(3, item.getMonth());
-                                ps.setInt(4, item.getTotalSalesAmount());
-                                ps.setInt(5, item.getTotalSalesCount());
+                                ps.setInt(4, item.getTotalSalesCount());
                             }
                         })
                 .build();

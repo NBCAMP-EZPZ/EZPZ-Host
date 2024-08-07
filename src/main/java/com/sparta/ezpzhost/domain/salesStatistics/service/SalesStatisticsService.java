@@ -118,10 +118,9 @@ public class SalesStatisticsService {
 
         if (monthlySalesStatistics.isEmpty()) {
             newMonthlySalesStatistics = MonthlySalesStatistics.of(item, currentYear, currentMonth,
-                    salesAmount, salesCount);
+                    salesCount);
         } else {
             newMonthlySalesStatistics = MonthlySalesStatistics.of(item, currentYear, currentMonth,
-                    salesAmount + monthlySalesStatistics.get().getTotalSalesAmount(),
                     salesCount + monthlySalesStatistics.get()
                             .getTotalSalesCount());
             updatedStatisticsList.removeFirst();
