@@ -76,7 +76,7 @@ jobs:
 
       # Docker 이미지 생성
       - name: Docker build
-        run: docker build . --platform linux/amd64 -f docker/Dockerfile -t ezpz-host:latest
+        run: docker build . --platform linux/amd64 -f docker/Dockerfile -t ${{ secrets.ECR_URL }}:latest
 
       # AWS CLI 설치
       - name: AWS-cli setup
