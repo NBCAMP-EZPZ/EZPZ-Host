@@ -31,13 +31,14 @@ public class SalesStatisticsController {
                 "월별 매출 조회 성공");
     }
 
-//    @GetMapping("/recent-month")
-//    public ResponseEntity<CommonResponse<?>> getRecentMonthSalesStatistics(
-//            @RequestParam Long itemId,
-//            @AuthenticationPrincipal UserDetailsImpl userDetails
-//    ) {
-//        return getResponseEntity(
-//                salesStatisticsService.getRecentMonthSalesStatistics(itemId, userDetails.getHost()),
-//                "최근 30일 간 매출 조회 성공");
-//    }
+    @GetMapping("/recent-month")
+    public ResponseEntity<CommonResponse<?>> getRecentMonthSalesStatistics(
+            @RequestParam Long popupId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        return getResponseEntity(
+                salesStatisticsService.getDailyPopupSalesStatistics(popupId,
+                        userDetails.getHost()),
+                "최근 한달 간 매출 조회 성공");
+    }
 }

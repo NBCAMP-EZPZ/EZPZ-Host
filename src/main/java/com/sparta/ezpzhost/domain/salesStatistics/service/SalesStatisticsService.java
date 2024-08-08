@@ -7,8 +7,13 @@ import com.sparta.ezpzhost.domain.item.entity.Item;
 import com.sparta.ezpzhost.domain.item.repository.ItemRepository;
 import com.sparta.ezpzhost.domain.orderline.entity.Orderline;
 import com.sparta.ezpzhost.domain.orderline.repository.OrderlineRepository;
+import com.sparta.ezpzhost.domain.popup.entity.Popup;
+import com.sparta.ezpzhost.domain.popup.repository.popup.PopupRepository;
+import com.sparta.ezpzhost.domain.salesStatistics.dto.DailyPopupSalesStatisticsResponseDto;
 import com.sparta.ezpzhost.domain.salesStatistics.dto.MonthlySalesStatisticsResponseDto;
+import com.sparta.ezpzhost.domain.salesStatistics.entity.DailyPopupSalesStatistics;
 import com.sparta.ezpzhost.domain.salesStatistics.entity.MonthlySalesStatistics;
+import com.sparta.ezpzhost.domain.salesStatistics.repository.DailyPopupSalesStatisticsRepository;
 import com.sparta.ezpzhost.domain.salesStatistics.repository.MonthlySalesStatisticsRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,16 +28,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SalesStatisticsService {
 
     private final MonthlySalesStatisticsRepository monthlySalesStatisticsRepository;
+    private final DailyPopupSalesStatisticsRepository dailyPopupSalesStatisticsRepository;
     private final JobExplorer jobExplorer;
     private final ItemRepository itemRepository;
     private final OrderlineRepository orderlineRepository;
+    private final PopupRepository popupRepository;
 
 
     public List<MonthlySalesStatisticsResponseDto> getMonthlySalesStatistics(
@@ -56,26 +65,23 @@ public class SalesStatisticsService {
                 Collectors.toList());
     }
 
-//    public RecentMonthSalesStatisticsResponseDto getRecentMonthSalesStatistics(Long itemId,
-//            Host host) {
-//        if (!itemRepository.isItemSoldByHost(itemId, host.getId())) {
-//            throw new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN);
-//        }
-//
-//        RecentMonthSalesStatistics recentMonthSalesStatistics = recentMonthSalesStatisticsRepository.findByItemId(
-//                itemId).orElseThrow(() -> new CustomException(ErrorType.STATISTICS_NOT_FOUND));
-//
-//        List<Orderline> recentOrderLines = orderlineRepository.findRecentOrderLinesByItemId(
-//                itemId, getLastJobExecutionTime());
-//
-//        int additionalSalesAmount = recentOrderLines.stream().mapToInt(Orderline::getOrderPrice)
-//                .sum() + recentMonthSalesStatistics.getTotalSalesAmount();
-//        int additionalSalesCount = recentOrderLines.stream().mapToInt(Orderline::getQuantity).sum()
-//                + recentMonthSalesStatistics.getTotalSalesCount();
-//
-//        return RecentMonthSalesStatisticsResponseDto.of(itemId, additionalSalesAmount,
-//                additionalSalesCount);
-//    }
+    public List<DailyPopupSalesStatisticsResponseDto> getDailyPopupSalesStatistics(Long popupId,
+            Host host) {
+        Popup popup = popupRepository.findByIdAndHostId(popupId, host.getId())
+                .orElseThrow(() -> new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN));
+
+        List<DailyPopupSalesStatistics> dailyPopupSalesStatistics = dailyPopupSalesStatisticsRepository.findByPopupIdOrderByYearDescMonthDescDayDesc(
+                popupId);
+        List<Orderline> recentOrderlines = orderlineRepository.findRecentOrderLinesByPopupId(
+                popupId, getLastJobExecutionTime());
+
+        DailyPopupSalesStatistics newDailyPopupSalesStatistics = calculateTodaySales(popup,
+                recentOrderlines);
+        dailyPopupSalesStatistics.add(0, newDailyPopupSalesStatistics);
+
+        return dailyPopupSalesStatistics.stream().map(DailyPopupSalesStatisticsResponseDto::of)
+                .collect(Collectors.toList());
+    }
 
     /* UTIL */
     private LocalDateTime getLastJobExecutionTime() {
@@ -89,7 +95,7 @@ public class SalesStatisticsService {
                         .orElse(null))
                 .filter(Objects::nonNull) // null 값 필터링
                 .max(LocalDateTime::compareTo)
-                .orElse(LocalDateTime.now().minusDays(1)); // 예시로 하루 전 시간을 반환하도록 설정
+                .orElse(LocalDateTime.now().minusDays(1)); // 하루 전 시간을 반환하도록 설정
     }
 
     private List<MonthlySalesStatistics> updateMonthlySalesStatistics(Long itemId,
@@ -104,7 +110,6 @@ public class SalesStatisticsService {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN));
 
-        int salesAmount = recentOrderLines.stream().mapToInt(Orderline::getOrderPrice).sum();
         int salesCount = recentOrderLines.stream().mapToInt(Orderline::getQuantity).sum();
 
         MonthlySalesStatistics newMonthlySalesStatistics;
@@ -124,5 +129,18 @@ public class SalesStatisticsService {
         updatedStatisticsList.addFirst(newMonthlySalesStatistics);
 
         return updatedStatisticsList;
+    }
+
+    private DailyPopupSalesStatistics calculateTodaySales(Popup popup,
+            List<Orderline> recentOrderLines) {
+        LocalDate currentDate = LocalDate.now();
+        int currentYear = currentDate.getYear();
+        int currentMonth = currentDate.getMonthValue();
+        int currentDay = currentDate.getDayOfMonth();
+
+        int totalSalesAmount = recentOrderLines.stream().mapToInt(Orderline::getOrderPrice).sum();
+
+        return DailyPopupSalesStatistics.of(popup, currentYear, currentMonth, currentDay,
+                totalSalesAmount);
     }
 }

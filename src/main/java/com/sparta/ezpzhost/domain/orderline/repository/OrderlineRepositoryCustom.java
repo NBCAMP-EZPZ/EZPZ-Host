@@ -8,4 +8,6 @@ public interface OrderlineRepositoryCustom {
 
     List<Orderline> findRecentOrderLinesByItemId(Long itemId,
             LocalDateTime lastJobExecutionTime);
+
+    List<Orderline> findRecentOrderLinesByPopupId(Long popupId, LocalDateTime lastJobExecutionTime);
 }
