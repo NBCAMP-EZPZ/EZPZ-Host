@@ -121,10 +121,10 @@ jobs:
                 -e DDL_AUTO=${{ secrets.DDL_AUTO }} \
                 -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
                 -e REDIS_PORT=${{ secrets.REDIS_PORT }} \
-                -e AWS_ACCESS_KEY=${{ secrets.REDIS_PORT }} \
-                -e AWS_SECRET_KEY=${{ secrets.REDIS_PORT }} \
-                -e AWS_BUCKET_NAME=${{ secrets.REDIS_PORT }} \
-                -e AWS_REGION=${{ secrets.REDIS_PORT }} \
+                -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
+                -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
+                -e AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }} \
+                -e AWS_REGION=${{ secrets.AWS_REGION }} \
                 --restart always --name ezpz-host ${{ env.ECR_URL }}:latest" >> scripts/deploy.sh
 
       # deploy files upload to S3
