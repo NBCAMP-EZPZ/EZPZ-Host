@@ -1,4 +1,4 @@
-package com.sparta.ezpzhost.common.batch;
+package com.sparta.ezpzhost.common.scheduler;
 
 import com.sparta.ezpzhost.common.config.JobConfig;
 import lombok.RequiredArgsConstructor;
