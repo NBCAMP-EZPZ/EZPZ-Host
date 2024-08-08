@@ -3,8 +3,10 @@ package com.sparta.ezpzhost.common.config;
 import com.sparta.ezpzhost.domain.item.entity.Item;
 import com.sparta.ezpzhost.domain.item.repository.ItemRepository;
 import com.sparta.ezpzhost.domain.order.repository.OrderRepository;
+import com.sparta.ezpzhost.domain.popup.entity.Popup;
+import com.sparta.ezpzhost.domain.popup.repository.popup.PopupRepository;
+import com.sparta.ezpzhost.domain.salesStatistics.entity.DailyPopupSalesStatistics;
 import com.sparta.ezpzhost.domain.salesStatistics.entity.MonthlySalesStatistics;
-import com.sparta.ezpzhost.domain.salesStatistics.entity.RecentMonthSalesStatistics;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -17,15 +19,18 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.ItemPreparedStatementSetter;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
+import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -35,14 +40,18 @@ public class JobConfig {
     private final DataSource dataSource;
     private final ItemRepository itemRepository;
     private final OrderRepository orderRepository;
+    private final PopupRepository popupRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     @Bean
     public Job salesStatisticsJob(JobRepository jobRepository, Step monthlySalesStep,
-            Step recentMonthSalesStep) {
+            Step deleteOldSalesStep,
+            Step dailyPopupSalesStep) {
         return new JobBuilder("salesStatisticsJob", jobRepository)
                 .incrementer(new RunIdIncrementer()) // 배치 작업의 실행마다 고유한 ID를 생성
                 .start(monthlySalesStep)
-                .next(recentMonthSalesStep)
+                .next(deleteOldSalesStep)
+                .next(dailyPopupSalesStep)
                 .build();
     }
 
@@ -58,14 +67,35 @@ public class JobConfig {
     }
 
     @Bean
-    public Step recentMonthSalesStep(JobRepository jobRepository,
+    public Step dailyPopupSalesStep(JobRepository jobRepository,
             PlatformTransactionManager transactionManager) {
-        return new StepBuilder("recentMonthSalesStep", jobRepository)
-                .<Map<String, Object>, RecentMonthSalesStatistics>chunk(100, transactionManager)
-                .reader(recentMonthSalesReader())
-                .processor(recentMonthSalesProcessor())
-                .writer(recentMonthSalesWriter())
+        return new StepBuilder("dailyPopupSalesStep", jobRepository)
+                .<Map<String, Object>, DailyPopupSalesStatistics>chunk(100, transactionManager)
+                .reader(dailyPopupSalesReader())
+                .processor(dailyPopupSalesProcessor())
+                .writer(dailyPopupSalesWriter())
                 .build();
+    }
+
+    @Bean
+    public Step deleteOldSalesStep(JobRepository jobRepository,
+            PlatformTransactionManager transactionManager) {
+        return new StepBuilder("deleteOldSalesStep", jobRepository)
+                .tasklet(deleteOldSalesTasklet(), transactionManager)
+                .build();
+    }
+
+    @Bean
+    public Tasklet deleteOldSalesTasklet() {
+        return (contribution, chunkContext) -> {
+            jdbcTemplate.update(
+                    "DELETE FROM daily_popup_sales_statistics "
+                            + "WHERE (year < YEAR(CURDATE() - INTERVAL 1 MONTH)) "
+                            + "OR (year = YEAR(CURDATE() - INTERVAL 1 MONTH) AND month < MONTH(CURDATE() - INTERVAL 1 MONTH)) "
+                            + "OR (year = YEAR(CURDATE() - INTERVAL 1 MONTH) AND month = MONTH(CURDATE() - INTERVAL 1 MONTH) AND day < DAY(CURDATE() - INTERVAL 1 MONTH))");
+
+            return RepeatStatus.FINISHED;
+        };
     }
 
     @Bean
@@ -116,53 +146,61 @@ public class JobConfig {
                 .build();
     }
 
-
     @Bean
-    public JdbcCursorItemReader<Map<String, Object>> recentMonthSalesReader() {
+    public JdbcCursorItemReader<Map<String, Object>> dailyPopupSalesReader() {
         return new JdbcCursorItemReaderBuilder<Map<String, Object>>()
                 .dataSource(dataSource)
-                .name("recentMonthSalesReader")
-                .sql("SELECT item_id, SUM(orderline.order_price) AS total_sales_amount, SUM(orderline.quantity) AS total_sales_count "
+                .name("dailyPopupSalesReader")
+                .sql("SELECT i.popup_id AS popup_id, YEAR(o.modified_at) AS year, MONTH(o.modified_at) AS month, DAY(o.modified_at) AS day, SUM(ol.order_price) AS total_sales_amount "
                         +
-                        "FROM orderline JOIN orders ON orderline.order_id = orders.order_id " +
-                        "WHERE orders.order_status = 'ORDER_COMPLETED' AND orders.modified_at > DATE_SUB(NOW(), INTERVAL 1 MONTH) "
-                        +
-                        "GROUP BY item_id")
+                        "FROM orderline ol " +
+                        "JOIN orders o ON ol.order_id = o.order_id " +
+                        "JOIN item i ON ol.item_id = i.item_id " +
+                        "WHERE o.order_status = 'ORDER_COMPLETED' " +
+                        "AND o.modified_at >= DATE_SUB(NOW(), INTERVAL 1 MONTH) " +
+                        "GROUP BY i.popup_id, YEAR(o.modified_at), MONTH(o.modified_at), DAY(o.modified_at)")
                 .rowMapper(new ColumnMapRowMapper())
                 .build();
     }
 
     @Bean
-    public ItemProcessor<Map<String, Object>, RecentMonthSalesStatistics> recentMonthSalesProcessor() {
+    public ItemProcessor<Map<String, Object>, DailyPopupSalesStatistics> dailyPopupSalesProcessor() {
         return resultMap -> {
-            Long itemId = (Long) resultMap.get("item_id");
-            Item item = itemRepository.findById(itemId)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid item ID: " + itemId));
+            Long popupId = (Long) resultMap.get("popup_id");
+            Popup popup = popupRepository.findById(popupId).orElseThrow(
+                    () -> new IllegalArgumentException("Invalid popup ID: " + popupId));
 
+            int year = ((Number) resultMap.get("year")).intValue();
+            int month = ((Number) resultMap.get("month")).intValue();
+            int day = ((Number) resultMap.get("day")).intValue();
             int totalSalesAmount = ((Number) resultMap.get("total_sales_amount")).intValue();
-            int totalSalesCount = ((Number) resultMap.get("total_sales_count")).intValue();
 
-            return RecentMonthSalesStatistics.of(item, totalSalesAmount, totalSalesCount);
+            return DailyPopupSalesStatistics.of(popup, year, month, day, totalSalesAmount);
         };
     }
 
     @Bean
-    public JdbcBatchItemWriter<RecentMonthSalesStatistics> recentMonthSalesWriter() {
-        return new JdbcBatchItemWriterBuilder<RecentMonthSalesStatistics>()
+    public JdbcBatchItemWriter<DailyPopupSalesStatistics> dailyPopupSalesWriter() {
+        return new JdbcBatchItemWriterBuilder<DailyPopupSalesStatistics>()
                 .dataSource(dataSource)
-                .sql("INSERT INTO recent_month_sales_statistics (item_id, total_sales_amount, total_sales_count) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE total_sales_amount = VALUES(total_sales_amount), total_sales_count = VALUES(total_sales_count)")
+                .sql("INSERT INTO daily_popup_sales_statistics (popup_id, year, month, day, total_sales_amount) VALUES (?, ?, ?, ?, ?) "
+                        +
+                        "ON DUPLICATE KEY UPDATE total_sales_amount = VALUES(total_sales_amount)")
                 .itemPreparedStatementSetter(
-                        new ItemPreparedStatementSetter<RecentMonthSalesStatistics>() {
+                        new ItemPreparedStatementSetter<DailyPopupSalesStatistics>() {
                             @Override
-                            public void setValues(RecentMonthSalesStatistics item,
+                            public void setValues(DailyPopupSalesStatistics item,
                                     PreparedStatement ps) throws SQLException {
-                                ps.setLong(1, item.getItem().getId());
-                                ps.setInt(2, item.getTotalSalesAmount());
-                                ps.setInt(3, item.getTotalSalesCount());
+                                ps.setLong(1, item.getPopup().getId());
+                                ps.setInt(2, item.getYear());
+                                ps.setInt(3, item.getMonth());
+                                ps.setInt(4, item.getDay());
+                                ps.setInt(5, item.getTotalSalesAmount());
                             }
                         })
                 .build();
     }
+
 
     public boolean isDataChanged() {
         // 데이터 변경 여부를 확인하는 로직

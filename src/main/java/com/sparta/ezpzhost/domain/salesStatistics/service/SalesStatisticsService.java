@@ -8,11 +8,8 @@ import com.sparta.ezpzhost.domain.item.repository.ItemRepository;
 import com.sparta.ezpzhost.domain.orderline.entity.Orderline;
 import com.sparta.ezpzhost.domain.orderline.repository.OrderlineRepository;
 import com.sparta.ezpzhost.domain.salesStatistics.dto.MonthlySalesStatisticsResponseDto;
-import com.sparta.ezpzhost.domain.salesStatistics.dto.RecentMonthSalesStatisticsResponseDto;
 import com.sparta.ezpzhost.domain.salesStatistics.entity.MonthlySalesStatistics;
-import com.sparta.ezpzhost.domain.salesStatistics.entity.RecentMonthSalesStatistics;
 import com.sparta.ezpzhost.domain.salesStatistics.repository.MonthlySalesStatisticsRepository;
-import com.sparta.ezpzhost.domain.salesStatistics.repository.RecentMonthSalesStatisticsRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -33,8 +30,6 @@ import org.springframework.stereotype.Service;
 public class SalesStatisticsService {
 
     private final MonthlySalesStatisticsRepository monthlySalesStatisticsRepository;
-
-    private final RecentMonthSalesStatisticsRepository recentMonthSalesStatisticsRepository;
     private final JobExplorer jobExplorer;
     private final ItemRepository itemRepository;
     private final OrderlineRepository orderlineRepository;
@@ -61,26 +56,26 @@ public class SalesStatisticsService {
                 Collectors.toList());
     }
 
-    public RecentMonthSalesStatisticsResponseDto getRecentMonthSalesStatistics(Long itemId,
-            Host host) {
-        if (!itemRepository.isItemSoldByHost(itemId, host.getId())) {
-            throw new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN);
-        }
-
-        RecentMonthSalesStatistics recentMonthSalesStatistics = recentMonthSalesStatisticsRepository.findByItemId(
-                itemId).orElseThrow(() -> new CustomException(ErrorType.STATISTICS_NOT_FOUND));
-
-        List<Orderline> recentOrderLines = orderlineRepository.findRecentOrderLinesByItemId(
-                itemId, getLastJobExecutionTime());
-
-        int additionalSalesAmount = recentOrderLines.stream().mapToInt(Orderline::getOrderPrice)
-                .sum() + recentMonthSalesStatistics.getTotalSalesAmount();
-        int additionalSalesCount = recentOrderLines.stream().mapToInt(Orderline::getQuantity).sum()
-                + recentMonthSalesStatistics.getTotalSalesCount();
-
-        return RecentMonthSalesStatisticsResponseDto.of(itemId, additionalSalesAmount,
-                additionalSalesCount);
-    }
+//    public RecentMonthSalesStatisticsResponseDto getRecentMonthSalesStatistics(Long itemId,
+//            Host host) {
+//        if (!itemRepository.isItemSoldByHost(itemId, host.getId())) {
+//            throw new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN);
+//        }
+//
+//        RecentMonthSalesStatistics recentMonthSalesStatistics = recentMonthSalesStatisticsRepository.findByItemId(
+//                itemId).orElseThrow(() -> new CustomException(ErrorType.STATISTICS_NOT_FOUND));
+//
+//        List<Orderline> recentOrderLines = orderlineRepository.findRecentOrderLinesByItemId(
+//                itemId, getLastJobExecutionTime());
+//
+//        int additionalSalesAmount = recentOrderLines.stream().mapToInt(Orderline::getOrderPrice)
+//                .sum() + recentMonthSalesStatistics.getTotalSalesAmount();
+//        int additionalSalesCount = recentOrderLines.stream().mapToInt(Orderline::getQuantity).sum()
+//                + recentMonthSalesStatistics.getTotalSalesCount();
+//
+//        return RecentMonthSalesStatisticsResponseDto.of(itemId, additionalSalesAmount,
+//                additionalSalesCount);
+//    }
 
     /* UTIL */
     private LocalDateTime getLastJobExecutionTime() {
