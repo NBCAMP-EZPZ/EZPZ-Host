@@ -86,6 +86,7 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers("api/v1/signup").permitAll()
+                .requestMatchers("/health").permitAll()
                 .anyRequest().authenticated()
         );
 
