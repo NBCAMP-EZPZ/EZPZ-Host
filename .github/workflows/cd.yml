@@ -103,13 +103,13 @@ jobs:
       - name: AWS ECR upload and setting deploy files
         id: build-image
         run: |
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{ secrets.ECR_URL }}
           docker push ${{ env.ECR_URL }}:latest 
           echo "image= ${{ env.ECR_URL }}:latest" >> $GITHUB_OUTPUT
           mkdir scripts
           touch scripts/deploy.sh
-          echo "aws ecr get-login-password --region ${{ secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}" >> scripts/deploy.sh
-          echo "docker pull ${{ env.ECR_URL }}:latest" >> scripts/deploy.sh
+          echo "aws ecr get-login-password --region ${{ secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{ secrets.ECR_URL }}" >> scripts/deploy.sh
+          echo "docker pull ${{ secrets.ECR_URL }}:latest" >> scripts/deploy.sh
           echo "docker run -d -p 8080:8081 \
                 -e SERVER_PORT=${{ secrets.SERVER_PORT }} \
                 -e DATASOURCE_URL=${{ secrets.DATASOURCE_URL }} \
@@ -125,7 +125,7 @@ jobs:
                 -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
                 -e AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }} \
                 -e AWS_REGION=${{ secrets.AWS_REGION }} \
-                --restart always --name ezpz-host ${{ env.ECR_URL }}:latest" >> scripts/deploy.sh
+                --restart always --name ezpz-host ${{ secrets.ECR_URL }}:latest" >> scripts/deploy.sh
 
       # deploy files upload to S3
       - name: upload to S3
