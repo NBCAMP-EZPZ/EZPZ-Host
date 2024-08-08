@@ -131,7 +131,7 @@ jobs:
       - name: upload to S3
         run: |
           zip -r ezpz-host-latest.zip ./scripts appspec.yml
-          aws s3 cp --region ${{ secrets.AWS_REGION }} --acl private ./ezpz-host-latest.zip s3://${{ secrets.AWS_BUCKET_NAME }}/scripts
+          aws s3 cp --region ${{ secrets.AWS_REGION }} --acl private ./ezpz-host-latest.zip s3://${{ secrets.AWS_BUCKET_NAME }}/scripts/
 
       # start deploy
       - name: start deploy 
