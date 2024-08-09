@@ -16,9 +16,14 @@ import org.springframework.stereotype.Component;
 public class LogAspect {
 
     @Pointcut("within(com.sparta.ezpzhost.domain.*.controller.*)")
-    private void pointcut() {}
+    private void pointcut() {
+    }
 
-    @Around("pointcut()")
+    @Pointcut("execution(* org.springframework.batch.core.launch.JobLauncher.run(..))")
+    private void batchJobExecutionPointcut() {
+    }
+
+    @Around("pointcut() || batchJobExecutionPointcut()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
         Object proceed = joinPoint.proceed();

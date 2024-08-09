@@ -1,11 +1,11 @@
 package com.sparta.ezpzhost.common.exception;
 
+import static com.sparta.ezpzhost.common.resolver.CustomPageableHandlerMethodArgumentResolver.MAX_PAGE_SIZE;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-
-import static com.sparta.ezpzhost.common.resolver.CustomPageableHandlerMethodArgumentResolver.MAX_PAGE_SIZE;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Getter
 @AllArgsConstructor
@@ -62,11 +62,10 @@ public enum ErrorType {
 
     // Page
     INVALID_PAGE(HttpStatus.BAD_REQUEST, "페이지 번호가 올바르지 않습니다."),
-    NOT_FOUND_PAGE(HttpStatus.NOT_FOUND, "페이지가 존재하지 않습니다.")
-    
-    //
+    NOT_FOUND_PAGE(HttpStatus.NOT_FOUND, "페이지가 존재하지 않습니다."),
 
-    ;
+    // SalesStatistics
+    STATISTICS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 상품의 통계 정보를 찾을 수 없습니다.");
     private final HttpStatus httpStatus;
     private final String message;
 

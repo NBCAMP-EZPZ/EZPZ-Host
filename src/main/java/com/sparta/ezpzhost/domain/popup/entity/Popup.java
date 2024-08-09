@@ -8,14 +8,23 @@ import com.sparta.ezpzhost.domain.popup.dto.ImageResponseDto;
 import com.sparta.ezpzhost.domain.popup.dto.PopupRequestDto;
 import com.sparta.ezpzhost.domain.popup.enums.ApprovalStatus;
 import com.sparta.ezpzhost.domain.popup.enums.PopupStatus;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter
@@ -80,7 +89,7 @@ public class Popup extends Timestamped {
     private List<Image> imageList;
 
     private Popup(Host host, PopupRequestDto requestDto, ImageResponseDto thumbnail,
-                  PopupStatus popupStatus, ApprovalStatus approvalStatus) {
+            PopupStatus popupStatus, ApprovalStatus approvalStatus) {
         this.host = host;
         this.name = requestDto.getName();
         this.description = requestDto.getDescription();
@@ -98,7 +107,7 @@ public class Popup extends Timestamped {
     }
 
     public static Popup of(Host host, PopupRequestDto requestDto, ImageResponseDto thumbnail,
-                           PopupStatus popupStatus, ApprovalStatus approvalStatus) {
+            PopupStatus popupStatus, ApprovalStatus approvalStatus) {
         return new Popup(host, requestDto, thumbnail, popupStatus, approvalStatus);
     }
 
@@ -166,4 +175,10 @@ public class Popup extends Timestamped {
         }
     }
 
+    /**
+     * 팝업 종료
+     */
+    public void completePopup() {
+        this.popupStatus = PopupStatus.COMPLETED;
+    }
 }
