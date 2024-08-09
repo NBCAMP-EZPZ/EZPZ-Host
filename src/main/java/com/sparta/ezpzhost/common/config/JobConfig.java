@@ -77,6 +77,13 @@ public class JobConfig {
                 .build();
     }
 
+    /**
+     * 최근 한달 간의 일별 통계 조회를 위해서 가장 오래된 통계 자료 삭제
+     *
+     * @param jobRepository
+     * @param transactionManager
+     * @return
+     */
     @Bean
     public Step deleteOldSalesStep(JobRepository jobRepository,
             PlatformTransactionManager transactionManager) {
@@ -97,6 +104,8 @@ public class JobConfig {
             return RepeatStatus.FINISHED;
         };
     }
+
+    /* 각 상품의 월별 판매량 통계 조회를 위한 Reader, Processor, Writer */
 
     @Bean
     public JdbcCursorItemReader<Map<String, Object>> monthlySalesReader() {
@@ -145,6 +154,8 @@ public class JobConfig {
                         })
                 .build();
     }
+
+    /* 각 팝업의 최근 한달 간 일별 매출액 통계 조회를 위한 Reader, Processor, Writer */
 
     @Bean
     public JdbcCursorItemReader<Map<String, Object>> dailyPopupSalesReader() {
@@ -201,15 +212,24 @@ public class JobConfig {
                 .build();
     }
 
+    /* UTIL */
 
+    /**
+     * 데이터 변경 여부를 확인하는 로직
+     *
+     * @return
+     */
     public boolean isDataChanged() {
-        // 데이터 변경 여부를 확인하는 로직
         return orderRepository.existsByModifiedAtAfter(getLastJobExecutionTime()) ||
                 itemRepository.existsByModifiedAtAfter(getLastJobExecutionTime());
     }
 
+    /**
+     * 마지막으로 성공한 배치 작업의 실행 시간을 반환
+     *
+     * @return
+     */
     private LocalDateTime getLastJobExecutionTime() {
-        // 마지막으로 성공한 배치 작업의 실행 시간을 반환
         return LocalDateTime.now().minusDays(1);
     }
 }

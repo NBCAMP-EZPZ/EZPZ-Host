@@ -16,8 +16,9 @@ public class BatchScheduler {
     private final Job salesStatisticsJob;
     private final JobConfig jobConfig;
 
-//    @Scheduled(cron = "0 12 17 * * ?") // 매일 오후 12시 58분에 실행
+//    @Scheduled(cron = "0 0 0 * * ?")
 //    public void runSalesStatisticsJob() {
+//        // 새로 들어온 데이터가 있을 때에만 Job을 수행하기 위한 로직
 //        if (jobConfig.isDataChanged()) {
 //            try {
 //                JobParameters jobParameters = new JobParametersBuilder()

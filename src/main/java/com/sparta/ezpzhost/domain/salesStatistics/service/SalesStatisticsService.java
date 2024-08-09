@@ -30,7 +30,13 @@ public class SalesStatisticsService {
     private final ItemRepository itemRepository;
     private final PopupRepository popupRepository;
 
-
+    /**
+     * 각 상품의 월별 판매량 통계 조회
+     *
+     * @param itemId
+     * @param host
+     * @return
+     */
     public List<MonthlySalesStatisticsResponseDto> getMonthlySalesStatistics(
             Long itemId,
             Host host) {
@@ -45,6 +51,13 @@ public class SalesStatisticsService {
                 Collectors.toList());
     }
 
+    /**
+     * 각 팝업의 최근 한달 간 일별 매출액 통계 조회
+     *
+     * @param popupId
+     * @param host
+     * @return
+     */
     public List<DailyPopupSalesStatisticsResponseDto> getDailyPopupSalesStatistics(Long popupId,
             Host host) {
         Popup popup = popupRepository.findByIdAndHostId(popupId, host.getId())
