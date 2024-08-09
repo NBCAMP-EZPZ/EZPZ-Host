@@ -1,6 +1,5 @@
 package com.sparta.ezpzhost.domain.order.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.sparta.ezpzhost.domain.order.entity.Order;
 import com.sparta.ezpzhost.domain.order.enums.OrderStatus;
 import com.sparta.ezpzhost.domain.orderline.dto.OrderlineResponseDto;
@@ -18,7 +17,6 @@ public class OrderResponseDto {
     private String orderedAt;
     private List<OrderlineResponseDto> orderedItems;
 
-    @JsonCreator
     private OrderResponseDto(Long orderId, int totalPrice, OrderStatus orderStatus,
             String orderedAt, List<OrderlineResponseDto> orderedItems) {
         this.orderId = orderId;
