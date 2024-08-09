@@ -76,7 +76,7 @@ jobs:
 
       # Docker 이미지 생성
       - name: Docker build
-        run: docker build . --platform linux/amd64 -f docker/Dockerfile -t ezpz-host:latest
+        run: docker build . --platform linux/amd64 -f docker/Dockerfile -t ${{ secrets.ECR_URL }}:latest
 
       # AWS CLI 설치
       - name: AWS-cli setup
@@ -99,29 +99,44 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      # Docker image upload
-      - name: AWS ECR upload
+      # Docker image upload and setting deploy files
+      - name: AWS ECR upload and setting deploy files
         id: build-image
         run: |
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{ env.ECR_URL }}
-          docker tag ezpz-host:latest ${{ env.ECR_URL }}:latest
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{ secrets.ECR_URL }}
           docker push ${{ env.ECR_URL }}:latest 
           echo "image= ${{ env.ECR_URL }}:latest" >> $GITHUB_OUTPUT
+          mkdir scripts
+          touch scripts/deploy.sh
+          echo "aws ecr get-login-password --region ${{ secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{ secrets.ECR_URL }}" >> scripts/deploy.sh
+          echo "docker pull ${{ secrets.ECR_URL }}:latest" >> scripts/deploy.sh
+          echo "docker run -d -p 8080:8081 \
+                -e SERVER_PORT=${{ secrets.SERVER_PORT }} \
+                -e DATASOURCE_URL=${{ secrets.DATASOURCE_URL }} \
+                -e DATASOURCE_USERNAME=${{ secrets.DATASOURCE_USERNAME }} \
+                -e DATASOURCE_PASSWORD=${{ secrets.DATASOURCE_PASSWORD }} \
+                -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
+                -e ACCESS_TOKEN_TTL=${{ secrets.ACCESS_TOKEN_TTL }} \
+                -e REFRESH_TOKEN_TTL=${{ secrets.REFRESH_TOKEN_TTL }} \
+                -e DDL_AUTO=${{ secrets.DDL_AUTO }} \
+                -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
+                -e REDIS_PORT=${{ secrets.REDIS_PORT }} \
+                -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
+                -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
+                -e AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }} \
+                -e AWS_REGION=${{ secrets.AWS_REGION }} \
+                --restart always --name ezpz-host ${{ secrets.ECR_URL }}:latest" >> scripts/deploy.sh
 
-#      # ECS task definition 생성
-#      - name: Fill in the new image ID in the Amazon ECS task definition
-#        id: task-def
-#        uses: aws-actions/amazon-ecs-render-task-definition@v1
-#        with:
-#          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-#          container-name: ${{ env.CONTAINER_NAME }}
-#          image: ${{ steps.build-image.outputs.image }}
-#
-#      # ECS 배포
-#      - name: Deploy Amazon ECS task definition
-#        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-#        with:
-#          task-definition: ${{ steps.task-def.outputs.task-definition }}
-#          service: ${{ env.ECS_SERVICE }}
-#          cluster: ${{ env.ECS_CLUSTER }}
-#          wait-for-service-stability: true
+      # deploy files upload to S3
+      - name: upload to S3
+        run: |
+          zip -r ezpz-host-latest.zip ./scripts appspec.yml
+          aws s3 cp --region ${{ secrets.AWS_REGION }} --acl private ./ezpz-host-latest.zip s3://${{ secrets.AWS_BUCKET_NAME }}/scripts/
+
+      # start deploy
+      - name: start deploy 
+        run: |
+            aws deploy create-deployment --application-name ezpz-admin-deploy \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --deployment-group-name ezpz-host \
+            --s3-location bucket=${{ secrets.AWS_BUCKET_NAME }},bundleType=zip,key=scripts/ezpz-host-latest.zip
