@@ -18,6 +18,7 @@ import com.sparta.ezpzhost.domain.orderline.repository.OrderlineRepository;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -63,6 +64,7 @@ public class OrderService {
      * @param host    요청한 호스트
      * @return 요청한 주문 상세 조회 데이터
      */
+    @Cacheable(value = "ordersWithHost", key = "#orderId + '-' + #host.getId()")
     public OrderResponseDto findOrder(Long orderId, Host host) {
         Order order = orderRepository.findOrderWithDetails(orderId, host.getId());
 
