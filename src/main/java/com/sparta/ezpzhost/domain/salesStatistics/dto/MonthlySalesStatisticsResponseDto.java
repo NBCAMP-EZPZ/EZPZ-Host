@@ -2,8 +2,10 @@ package com.sparta.ezpzhost.domain.salesStatistics.dto;
 
 import com.sparta.ezpzhost.domain.salesStatistics.entity.MonthlySalesStatistics;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class MonthlySalesStatisticsResponseDto {
 
     private Long itemId;
