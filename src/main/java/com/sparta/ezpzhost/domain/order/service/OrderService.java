@@ -46,7 +46,7 @@ public class OrderService {
         OrderCondition cond = OrderCondition.of(orderRequestDto);
 
         if (cond.getItemId() != -1 && cond.getSearchType().equals(OrderSearchType.BY_ITEM)) {
-            Optional<Item> item = itemRepository.findByIdAndPopup_Host(cond.getItemId(), host);
+            Optional<Item> item = itemRepository.findByIdAndHost(cond.getItemId(), host);
 
             if (item.isEmpty()) {
                 throw new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN);
@@ -73,7 +73,7 @@ public class OrderService {
         }
 
         List<OrderlineResponseDto> orderlineResponseDtoList = order.getOrderlineList().stream()
-                .filter(orderline -> itemRepository.isItemSoldByHost(orderline.getItem().getId(),
+                .filter(orderline -> itemRepository.existsByIdAndHostId(orderline.getItem().getId(),
                         host.getId()))
                 .map(OrderlineResponseDto::of)
                 .toList();

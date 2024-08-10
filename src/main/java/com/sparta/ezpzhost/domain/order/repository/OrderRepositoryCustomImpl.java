@@ -1,10 +1,8 @@
 package com.sparta.ezpzhost.domain.order.repository;
 
-import static com.sparta.ezpzhost.domain.host.entity.QHost.host;
 import static com.sparta.ezpzhost.domain.item.entity.QItem.item;
 import static com.sparta.ezpzhost.domain.order.entity.QOrder.order;
 import static com.sparta.ezpzhost.domain.orderline.entity.QOrderline.orderline;
-import static com.sparta.ezpzhost.domain.popup.entity.QPopup.popup;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Wildcard;
@@ -31,7 +29,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                 .leftJoin(orderline).on(order.id.eq(orderline.order.id))
                 .leftJoin(orderline.item, item)
                 .where(
-                        item.popup.host.eq(host),
+                        item.host.eq(host),
                         searchTypeEq(cond)
                 )
                 .offset(pageable.getOffset())
@@ -43,7 +41,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                 .leftJoin(orderline).on(order.id.eq(orderline.order.id))
                 .leftJoin(orderline.item, item)
                 .where(
-                        item.popup.host.eq(host),
+                        item.host.eq(host),
                         searchTypeEq(cond)
                 )
                 .fetchOne();
@@ -57,10 +55,8 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
                 .selectFrom(order)
                 .leftJoin(order.orderlineList, orderline).fetchJoin()  // Order와 Orderline을 조인
                 .leftJoin(orderline.item, item)  // Orderline과 Item을 조인
-                .leftJoin(item.popup, popup)  // Item과 Popup을 조인
-                .leftJoin(popup.host, host) // Popup과 Host를 조인
                 .where(order.id.eq(orderId)  // Order ID를 필터
-                        .and(host.id.eq(hostId)))  // Host ID를 필터
+                        .and(item.host.id.eq(hostId)))  // Host ID를 필터
                 .fetchOne();
     }
 
