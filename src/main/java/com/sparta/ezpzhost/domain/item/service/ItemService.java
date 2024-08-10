@@ -48,7 +48,7 @@ public class ItemService {
         // 상품 이미지 업로드
         ImageResponseDto image = imageService.uploadItemImage(requestDto.getImage());
 
-        Item item = Item.of(popup, requestDto, image);
+        Item item = Item.of(popup, host, requestDto, image);
         Item savedItem = itemRepository.save(item);
 
         return ItemResponseDto.of(savedItem);
@@ -131,6 +131,9 @@ public class ItemService {
         imageService.deleteItemImage(item.getImageName());
     }
 
+    
+    /* UTIL */
+
     /**
      * 상품 찾기
      *
@@ -139,7 +142,7 @@ public class ItemService {
      * @return 상품
      */
     private Item findItemByIdAndHost(Long itemId, Host host) {
-        return itemRepository.findByIdAndPopup_Host(itemId, host)
+        return itemRepository.findByIdAndHost(itemId, host)
                 .orElseThrow(() -> new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN));
     }
 

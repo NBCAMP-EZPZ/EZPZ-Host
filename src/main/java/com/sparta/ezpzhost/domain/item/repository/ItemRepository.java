@@ -12,7 +12,7 @@ public interface ItemRepository extends JpaRepository<Item, Long>, ItemRepositor
 
     boolean existsByName(String name);
 
-    Optional<Item> findByIdAndPopup_Host(Long itemId, Host host);
+    Optional<Item> findByIdAndHost(Long itemId, Host host);
 
     @Query("SELECT COUNT(i) > 0 FROM Item i JOIN i.popup p JOIN p.host h WHERE i.id = :itemId AND h.id = :hostId")
     boolean isItemSoldByHost(@Param("itemId") Long itemId, @Param("hostId") Long hostId);

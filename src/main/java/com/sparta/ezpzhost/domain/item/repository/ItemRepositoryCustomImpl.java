@@ -1,5 +1,7 @@
 package com.sparta.ezpzhost.domain.item.repository;
 
+import static com.sparta.ezpzhost.domain.item.entity.QItem.item;
+
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -7,15 +9,12 @@ import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.item.dto.ItemCondition;
 import com.sparta.ezpzhost.domain.item.entity.Item;
 import com.sparta.ezpzhost.domain.item.enums.ItemStatus;
+import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
-
-import java.util.List;
-import java.util.Objects;
-
-import static com.sparta.ezpzhost.domain.item.entity.QItem.item;
 
 @RequiredArgsConstructor
 public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
@@ -23,7 +22,8 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<Item> findAllItemsByPopupAndStatus(Host host, Pageable pageable, ItemCondition cond) {
+    public Page<Item> findAllItemsByPopupAndStatus(Host host, Pageable pageable,
+            ItemCondition cond) {
         // 데이터 조회 쿼리
         List<Item> items = jpaQueryFactory
                 .select(item)
@@ -54,7 +54,7 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
 
     // 조건 : 호스트
     private BooleanExpression hostEq(Host host) {
-        return Objects.nonNull(host) ? item.popup.host.id.eq(host.getId()) : null;
+        return Objects.nonNull(host) ? item.host.id.eq(host.getId()) : null;
     }
 
     // 조건 : 팝업 ID

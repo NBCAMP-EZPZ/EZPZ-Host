@@ -3,6 +3,7 @@ package com.sparta.ezpzhost.domain.item.entity;
 import com.sparta.ezpzhost.common.entity.Timestamped;
 import com.sparta.ezpzhost.common.exception.CustomException;
 import com.sparta.ezpzhost.common.exception.ErrorType;
+import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.item.dto.ItemRequestDto;
 import com.sparta.ezpzhost.domain.item.enums.ItemStatus;
 import com.sparta.ezpzhost.domain.popup.dto.ImageResponseDto;
@@ -38,6 +39,11 @@ public class Item extends Timestamped {
     @JoinColumn(name = "popup_id", nullable = false)
     private Popup popup;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "host_id", nullable = false)
+    private Host host;
+
+
     @Column(nullable = false)
     private String name;
 
@@ -63,9 +69,10 @@ public class Item extends Timestamped {
     @Enumerated(EnumType.STRING)
     private ItemStatus itemStatus;
 
-    private Item(Popup popup, ItemRequestDto requestDto, ImageResponseDto image,
+    private Item(Popup popup, Host host, ItemRequestDto requestDto, ImageResponseDto image,
             ItemStatus itemStatus) {
         this.popup = popup;
+        this.host = host;
         this.name = requestDto.getName();
         this.description = requestDto.getDescription();
         this.price = requestDto.getPrice();
@@ -76,8 +83,9 @@ public class Item extends Timestamped {
         this.itemStatus = itemStatus;
     }
 
-    public static Item of(Popup popup, ItemRequestDto requestDto, ImageResponseDto image) {
-        return new Item(popup, requestDto, image, ItemStatus.BEFORE_SALE);
+    public static Item of(Popup popup, Host host, ItemRequestDto requestDto,
+            ImageResponseDto image) {
+        return new Item(popup, host, requestDto, image, ItemStatus.BEFORE_SALE);
     }
 
     /**
