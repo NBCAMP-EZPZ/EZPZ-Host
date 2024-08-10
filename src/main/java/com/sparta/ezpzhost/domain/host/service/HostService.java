@@ -42,7 +42,7 @@ public class HostService {
      */
     @Transactional
     public void logout(Host host) {
-        refreshTokenRepository.deleteById(host.getUsername());
+        refreshTokenRepository.deleteByRefreshToken(host.getUsername());
     }
 
 }

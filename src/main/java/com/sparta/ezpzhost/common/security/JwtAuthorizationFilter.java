@@ -62,7 +62,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 } else {
                     log.error("리프레시 토큰 검증 실패");
                     // 리프레시 토큰이 공격당한 것으로 간주, 리프레시 토큰 삭제
-                    refreshTokenService.delete(refreshToken);
+                    refreshTokenService.deleteByRefreshToken(refreshToken);
                     unverifiedRefreshTokenHandler(res);
                     return;
                 }

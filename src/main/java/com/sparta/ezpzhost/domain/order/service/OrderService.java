@@ -16,6 +16,7 @@ import com.sparta.ezpzhost.domain.order.repository.OrderRepository;
 import com.sparta.ezpzhost.domain.orderline.dto.OrderlineResponseDto;
 import com.sparta.ezpzhost.domain.orderline.repository.OrderlineRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -51,9 +52,6 @@ public class OrderService {
             if (item.isEmpty()) {
                 throw new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN);
             }
-//            if (!item.getPopup().getHost().getId().equals(host.getId())) {
-//                throw new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN);
-//            }
         }
         Page<Order> orderPages = orderRepository.findOrdersAllByStatus(cond, pageable, host);
         PageUtil.validatePageableWithPage(pageable, orderPages);
@@ -67,6 +65,7 @@ public class OrderService {
      * @param host    요청한 호스트
      * @return 요청한 주문 상세 조회 데이터
      */
+    @Cacheable(value = "ordersWithHost", key = "#orderId + '-' + #host.getId()")
     public OrderResponseDto findOrder(Long orderId, Host host) {
         Order order = orderRepository.findOrderWithDetails(orderId, host.getId());
 

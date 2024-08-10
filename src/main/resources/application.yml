@@ -9,6 +9,12 @@ spring:
     password: ${DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  batch:
+    jdbc:
+      initialize-schema: never
+    job:
+      enabled: true
+
   servlet:
     multipart:
       maxFileSize: 10MB
@@ -26,17 +32,9 @@ spring:
 
   data:
     redis:
-      mode: cluster  # standalone, cluster
-      cluster:
-        max-redirects: 3
-        connect-ip: ${CLUSTER_CONNECT_IP}
-        nodes:
-          - ${CLUSTER_NODE_1}
-          - ${CLUSTER_NODE_2}
-          - ${CLUSTER_NODE_3}
-          - ${CLUSTER_NODE_4}
-          - ${CLUSTER_NODE_5}
-          - ${CLUSTER_NODE_6}
+      mode: standalone  # 테스트에서는 로컬 Redis 사용
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
 logging.level:
   org.hibernate.SQL: debug  # Hibernate SQL 쿼리를 debug 레벨로 설정하여 로깅합니다.
