@@ -15,8 +15,6 @@ import com.sparta.ezpzhost.domain.order.enums.OrderSearchType;
 import com.sparta.ezpzhost.domain.order.repository.OrderRepository;
 import com.sparta.ezpzhost.domain.orderline.dto.OrderlineResponseDto;
 import com.sparta.ezpzhost.domain.orderline.repository.OrderlineRepository;
-import java.util.List;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -24,9 +22,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
-@Transactional(readOnly = true)
 @AllArgsConstructor
+@Transactional(readOnly = true)
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -42,7 +43,7 @@ public class OrderService {
      * @return 조회 조건에 따른 주문 목록
      */
     public Page<OrderFindAllResponseDto> findAllOrders(OrderRequestDto orderRequestDto,
-            Pageable pageable, Host host) {
+                                                       Pageable pageable, Host host) {
         OrderCondition cond = OrderCondition.of(orderRequestDto);
 
         if (cond.getItemId() != -1 && cond.getSearchType().equals(OrderSearchType.BY_ITEM)) {
@@ -79,4 +80,5 @@ public class OrderService {
                 .toList();
         return OrderResponseDto.of(order, orderlineResponseDtoList);
     }
+
 }

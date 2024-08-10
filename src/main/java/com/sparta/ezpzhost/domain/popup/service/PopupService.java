@@ -2,19 +2,15 @@ package com.sparta.ezpzhost.domain.popup.service;
 
 import com.sparta.ezpzhost.common.exception.CustomException;
 import com.sparta.ezpzhost.common.exception.ErrorType;
+import com.sparta.ezpzhost.common.lock.DistributedLock;
 import com.sparta.ezpzhost.common.util.PageUtil;
 import com.sparta.ezpzhost.domain.host.entity.Host;
-import com.sparta.ezpzhost.domain.popup.dto.ImageResponseDto;
-import com.sparta.ezpzhost.domain.popup.dto.PopupCondition;
-import com.sparta.ezpzhost.domain.popup.dto.PopupPageResponseDto;
-import com.sparta.ezpzhost.domain.popup.dto.PopupRequestDto;
-import com.sparta.ezpzhost.domain.popup.dto.PopupResponseDto;
+import com.sparta.ezpzhost.domain.popup.dto.*;
 import com.sparta.ezpzhost.domain.popup.entity.Image;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
 import com.sparta.ezpzhost.domain.popup.enums.ApprovalStatus;
 import com.sparta.ezpzhost.domain.popup.enums.PopupStatus;
 import com.sparta.ezpzhost.domain.popup.repository.popup.PopupRepository;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,10 +19,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
-@Slf4j
 public class PopupService {
 
     private final PopupRepository popupRepository;
@@ -35,26 +32,26 @@ public class PopupService {
     /**
      * 팝업 등록
      *
-     * @param requestDto 팝업 등록 정보
-     * @param host       개최자
+     * @param dto    팝업 등록 정보
+     * @param host   개최자
+     * @param hostId 개최자 ID
      * @return 팝업 정보
      */
-    @Transactional
-    public PopupResponseDto createPopup(PopupRequestDto requestDto, Host host) {
-
+    @DistributedLock(key = "'createPopup-hostId-'.concat(#hostId)")
+    public PopupResponseDto createPopup(PopupRequestDto dto, Host host, Long hostId) {
         // 팝업명 중복 체크
-        duplicatedPopupName(requestDto.getName());
+        duplicatedPopupName(dto.getName());
 
         // 썸네일 업로드
-        ImageResponseDto thumbnail = imageService.uploadThumbnail(requestDto.getThumbnail());
+        ImageResponseDto thumbnail = imageService.uploadThumbnail(dto.getThumbnail());
 
         Popup popup = Popup.of(
-                host, requestDto, thumbnail, PopupStatus.SCHEDULED, ApprovalStatus.REVIEWING);
+                host, dto, thumbnail, PopupStatus.SCHEDULED, ApprovalStatus.REVIEWING);
 
         Popup savedPopup = popupRepository.save(popup);
 
         // 추가 사진 저장 및 업로드
-        List<ImageResponseDto> images = imageService.saveImages(popup, requestDto.getImages());
+        List<ImageResponseDto> images = imageService.saveImages(popup, dto.getImages());
 
         return PopupResponseDto.of(savedPopup, images);
     }
@@ -67,6 +64,7 @@ public class PopupService {
      * @param cond     조회 조건
      * @return 팝업 목록
      */
+    @Transactional(readOnly = true)
     public Page<?> findAllPopupsByStatus(Host host, Pageable pageable, PopupCondition cond) {
         Page<?> popupList = popupRepository.findAllPopupsByStatus(host, pageable, cond)
                 .map(PopupPageResponseDto::of);
@@ -81,6 +79,7 @@ public class PopupService {
      * @param host    호스트
      * @return 팝업 상세정보
      */
+    @Transactional(readOnly = true)
     public PopupResponseDto findPopup(Long popupId, Host host) {
         Popup popup = findPopupByIdAndHostId(popupId, host.getId());
 
@@ -97,7 +96,7 @@ public class PopupService {
      * @param host       호스트
      * @return 팝업 정보
      */
-    @Transactional
+    @DistributedLock(key = "'updatePopup-popupId-'.concat(#popupId)")
     public PopupResponseDto updatePopup(Long popupId, PopupRequestDto requestDto, Host host) {
 
         // 팝업 권한 및 수정 가능 여부 확인
@@ -117,7 +116,7 @@ public class PopupService {
                 .filter(img -> {
                     for (int i = 0; i < updateImage.size(); i++) {
                         if (img.getName().equals(updateImage.get(i).getOriginalFilename())) {
-                            log.info("Image : " + updateImage.get(i).getOriginalFilename());
+                            log.info("Image : {}", updateImage.get(i).getOriginalFilename());
                             updateImage.remove(i);
                             return false; // 사진명이 같다면 필터링
                         }
@@ -138,7 +137,7 @@ public class PopupService {
         // 새로운 추가 사진 업로드 여부
         if (!updateImage.isEmpty()) {
             // 추가 사진 업로드
-            List<ImageResponseDto> updateImages = imageService.saveImages(popup, updateImage);
+            imageService.saveImages(popup, updateImage);
         }
 
         // 이전 추가 사진 삭제 여부
@@ -162,7 +161,7 @@ public class PopupService {
      * @param popupId 팝업 ID
      * @param host    호스트
      */
-    @Transactional
+    @DistributedLock(key = "'cancelPopup-popupId-'.concat(#popupId)")
     public void cancelPopup(Long popupId, Host host) {
         Popup popup = findPopupByIdAndHostId(popupId, host.getId());
         popup.checkCancellationPossible();
@@ -182,7 +181,7 @@ public class PopupService {
      * @param popupId 팝업 ID
      * @return 팝업
      */
-    public Popup findPopupByIdAndHostId(Long popupId, Long hostId) {
+    private Popup findPopupByIdAndHostId(Long popupId, Long hostId) {
         return popupRepository.findByIdAndHostId(popupId, hostId)
                 .orElseThrow(() -> new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN));
     }
@@ -197,4 +196,5 @@ public class PopupService {
             throw new CustomException(ErrorType.DUPLICATED_POPUP_NAME);
         }
     }
+
 }
