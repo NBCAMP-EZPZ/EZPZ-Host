@@ -40,7 +40,7 @@ public class SalesStatisticsService {
     public List<MonthlySalesStatisticsResponseDto> getMonthlySalesStatistics(
             Long itemId,
             Host host) {
-        if (!itemRepository.isItemSoldByHost(itemId, host.getId())) {
+        if (!itemRepository.existsByIdAndHostId(itemId, host.getId())) {
             throw new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN);
         }
 
