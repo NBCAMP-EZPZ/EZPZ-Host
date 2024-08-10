@@ -1,7 +1,7 @@
 package com.sparta.ezpzhost.domain.popup.controller;
 
 import com.sparta.ezpzhost.common.security.UserDetailsImpl;
-import com.sparta.ezpzhost.common.util.PageUtil;
+import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.popup.dto.PopupCondition;
 import com.sparta.ezpzhost.domain.popup.dto.PopupRequestDto;
 import com.sparta.ezpzhost.domain.popup.dto.PopupResponseDto;
@@ -25,6 +25,7 @@ public class PopupController {
 
     /**
      * 팝업 등록
+     *
      * @param requestDto 팝업 등록 정보
      * @return 팝업 정보
      */
@@ -32,15 +33,17 @@ public class PopupController {
     public ResponseEntity<?> createPopup(
             @ModelAttribute @Valid PopupRequestDto requestDto,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        PopupResponseDto responseDto = popupService.createPopup(requestDto, userDetails.getHost());
+        Host host = userDetails.getHost();
+        PopupResponseDto responseDto = popupService.createPopup(requestDto, host, host.getId());
         return getResponseEntity(responseDto, "팝업스토어 등록 성공");
     }
 
     /**
      * 상태별 팝업 목록 조회
-     * @param pageable 페이징
+     *
+     * @param pageable       페이징
      * @param approvalStatus 승인 상태
-     * @param popupStatus 팝업 상태
+     * @param popupStatus    팝업 상태
      * @return 팝업 목록
      */
     @GetMapping("/v1/popups")
@@ -58,6 +61,7 @@ public class PopupController {
 
     /**
      * 팝업 상세 조회
+     *
      * @param popupId 팝업 ID
      * @return 팝업 상세정보
      */
@@ -71,7 +75,8 @@ public class PopupController {
 
     /**
      * 팝업 수정
-     * @param popupId 팝업 ID
+     *
+     * @param popupId    팝업 ID
      * @param requestDto 팝업 수정 정보
      * @return 팝업 정보
      */
@@ -86,6 +91,7 @@ public class PopupController {
 
     /**
      * 팝업 취소
+     *
      * @param popupId 팝업 ID
      * @return 성공 메시지
      */

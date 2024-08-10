@@ -1,12 +1,5 @@
 package com.sparta.ezpzhost.domain.order.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
-
 import com.sparta.ezpzhost.common.entity.Timestamped;
 import com.sparta.ezpzhost.common.exception.CustomException;
 import com.sparta.ezpzhost.common.exception.ErrorType;
@@ -28,10 +21,6 @@ import com.sparta.ezpzhost.domain.popup.entity.Popup;
 import com.sparta.ezpzhost.domain.popup.enums.ApprovalStatus;
 import com.sparta.ezpzhost.domain.popup.enums.PopupStatus;
 import com.sparta.ezpzhost.domain.user.entity.User;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,6 +31,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
 public class OrderServiceTest {
 
@@ -89,7 +88,6 @@ public class OrderServiceTest {
         );
         popup = new Popup(
                 1L,                    // id
-                host,                  // host
                 "Popup Name",          // name
                 "Popup Description",   // description
                 "http://example.com/thumbnail.jpg", // thumbnailUrl
@@ -97,13 +95,14 @@ public class OrderServiceTest {
                 "123 Popup St.",       // address
                 "Manager Name",        // managerName
                 "010-1234-5678",       // phoneNumber
-                PopupStatus.IN_PROGRESS,    // popupStatus
-                ApprovalStatus.APPROVED, // approvalStatus
-                0,
-            0,
-            0,
+                0,                     // likeCount
+                10,
+                4.5,
                 LocalDateTime.now(),   // startDate
                 LocalDateTime.now().plusDays(7), // endDate
+                PopupStatus.IN_PROGRESS,    // popupStatus
+                ApprovalStatus.APPROVED, // approvalStatus
+                host,                  // host
                 new ArrayList<>()
         );
         item = new Item(

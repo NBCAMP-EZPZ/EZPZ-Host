@@ -2,6 +2,7 @@ package com.sparta.ezpzhost.domain.item.service;
 
 import com.sparta.ezpzhost.common.exception.CustomException;
 import com.sparta.ezpzhost.common.exception.ErrorType;
+import com.sparta.ezpzhost.common.lock.DistributedLock;
 import com.sparta.ezpzhost.domain.host.entity.Host;
 import com.sparta.ezpzhost.domain.item.dto.ItemCondition;
 import com.sparta.ezpzhost.domain.item.dto.ItemPageResponseDto;
@@ -11,8 +12,8 @@ import com.sparta.ezpzhost.domain.item.entity.Item;
 import com.sparta.ezpzhost.domain.item.repository.ItemRepository;
 import com.sparta.ezpzhost.domain.popup.dto.ImageResponseDto;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
+import com.sparta.ezpzhost.domain.popup.repository.popup.PopupRepository;
 import com.sparta.ezpzhost.domain.popup.service.ImageService;
-import com.sparta.ezpzhost.domain.popup.service.PopupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,11 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class ItemService {
 
     private final ItemRepository itemRepository;
-    private final PopupService popupService;
+    private final PopupRepository popupRepository;
     private final ImageService imageService;
 
     /**
@@ -36,13 +36,14 @@ public class ItemService {
      * @param requestDto 상품 등록 정보
      * @return 상품 정보
      */
-    @Transactional
+    @DistributedLock(key = "'createItem-popupId-'.concat(#popupId)")
     public ItemResponseDto createItem(Host host, Long popupId, ItemRequestDto requestDto) {
-
         // 굿즈명 중복 체크
         duplicatedItemName(requestDto.getName());
 
-        Popup popup = popupService.findPopupByIdAndHostId(popupId, host.getId());
+        Popup popup = popupRepository.findByIdAndHostId(popupId, host.getId())
+                .orElseThrow(() -> new CustomException(ErrorType.POPUP_ACCESS_FORBIDDEN));
+
         popup.checkItemCanBeRegistered();
 
         // 상품 이미지 업로드
@@ -62,6 +63,7 @@ public class ItemService {
      * @param cond     조회 조건
      * @return 상품 목록
      */
+    @Transactional(readOnly = true)
     public Page<?> findAllItemsByPopupAndStatus(Host host, Pageable pageable, ItemCondition cond) {
         return itemRepository.findAllItemsByPopupAndStatus(host, pageable, cond)
                 .map(ItemPageResponseDto::of);
@@ -74,6 +76,7 @@ public class ItemService {
      * @param itemId 상품 ID
      * @return 상품 상세정보
      */
+    @Transactional(readOnly = true)
     public ItemResponseDto findItem(Host host, Long itemId) {
         return ItemResponseDto.of(findItemByIdAndHost(itemId, host));
     }
@@ -86,7 +89,7 @@ public class ItemService {
      * @param host       호스트
      * @return 상품 정보
      */
-    @Transactional
+    @DistributedLock(key = "'updateItem-itemId-'.concat(#itemId)")
     public ItemResponseDto updateItem(Long itemId, ItemRequestDto requestDto, Host host) {
 
         // 수정 권한 및 가능 여부 확인
@@ -123,7 +126,7 @@ public class ItemService {
      * @param itemStatus 상품 상태
      * @param host       호스트
      */
-    @Transactional
+    @DistributedLock(key = "'changeItemStatus-itemId-'.concat(#itemId)")
     public void changeItemStatus(Long itemId, String itemStatus, Host host) {
         Item item = findItemByIdAndHost(itemId, host);
         item.changeItemStatus(itemStatus);
@@ -153,4 +156,5 @@ public class ItemService {
             throw new CustomException(ErrorType.DUPLICATED_ITEM_NAME);
         }
     }
+
 }
