@@ -37,27 +37,27 @@ public class MonthlyItemSalesScheduler {
         }
     }
 
-    // 2023년 1월부터 전월까지의 데이터를 생성하기 위한 메서드
-    @Scheduled(cron = "0 35 23 * * ?")
-    public void runMonthlyItemSalesJobForInitialData() {
-        try {
-            LocalDate startDate = LocalDate.of(2023, 1, 1);  // 2023년 1월 1일
-            LocalDate endDate = LocalDate.now().minusMonths(1);  // 현재 날짜의 전월
-
-            for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusMonths(1)) {
-                String year = String.valueOf(date.getYear());
-                String month = String.valueOf(date.getMonthValue());
-
-                JobParameters jobParameters = new JobParametersBuilder()
-                        .addString("year", year)
-                        .addString("month", month)
-                        .addLong("run.id", System.currentTimeMillis()) // 고유한 ID 생성
-                        .toJobParameters();
-
-                jobLauncher.run(monthlyItemSalesJob, jobParameters);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    // 2023년 1월부터 전월까지의 초기 데이터를 생성하기 위한 메서드
+//    @Scheduled(cron = "0 54 23 * * ?")
+//    public void runMonthlyItemSalesJobForInitialData() {
+//        try {
+//            LocalDate startDate = LocalDate.of(2023, 1, 1);  // 2023년 1월 1일
+//            LocalDate endDate = LocalDate.now().minusMonths(1);  // 현재 날짜의 전월
+//
+//            for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusMonths(1)) {
+//                String year = String.valueOf(date.getYear());
+//                String month = String.valueOf(date.getMonthValue());
+//
+//                JobParameters jobParameters = new JobParametersBuilder()
+//                        .addString("year", year)
+//                        .addString("month", month)
+//                        .addLong("run.id", System.currentTimeMillis()) // 고유한 ID 생성
+//                        .toJobParameters();
+//
+//                jobLauncher.run(monthlyItemSalesJob, jobParameters);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 }
