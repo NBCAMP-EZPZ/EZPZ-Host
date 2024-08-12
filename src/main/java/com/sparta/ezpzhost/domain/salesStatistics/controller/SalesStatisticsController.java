@@ -21,18 +21,18 @@ public class SalesStatisticsController {
     private final SalesStatisticsService salesStatisticsService;
 
     @GetMapping("/monthly")
-    public ResponseEntity<CommonResponse<?>> getMonthlySalesStatistics(
+    public ResponseEntity<CommonResponse<?>> getMonthlyItemSalesStatistics(
             @RequestParam Long itemId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         return getResponseEntity(
-                salesStatisticsService.getMonthlySalesStatistics(itemId,
+                salesStatisticsService.getMonthlyItemSalesStatistics(itemId,
                         userDetails.getHost()),
                 "월별 매출 조회 성공");
     }
 
     @GetMapping("/recent-month")
-    public ResponseEntity<CommonResponse<?>> getRecentMonthSalesStatistics(
+    public ResponseEntity<CommonResponse<?>> getDailyPopupSalesStatistics(
             @RequestParam Long popupId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {

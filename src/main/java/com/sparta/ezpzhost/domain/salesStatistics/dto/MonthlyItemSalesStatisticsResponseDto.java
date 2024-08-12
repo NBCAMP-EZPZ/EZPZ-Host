@@ -1,19 +1,19 @@
 package com.sparta.ezpzhost.domain.salesStatistics.dto;
 
-import com.sparta.ezpzhost.domain.salesStatistics.entity.MonthlySalesStatistics;
+import com.sparta.ezpzhost.domain.salesStatistics.entity.MonthlyItemSalesStatistics;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class MonthlySalesStatisticsResponseDto {
+public class MonthlyItemSalesStatisticsResponseDto {
 
     private Long itemId;
     private int year;
     private int month;
     private int totalSalesCount;
 
-    private MonthlySalesStatisticsResponseDto(Long itemId, int year, int month,
+    private MonthlyItemSalesStatisticsResponseDto(Long itemId, int year, int month,
             int totalSalesCount) {
         this.itemId = itemId;
         this.year = year;
@@ -21,8 +21,8 @@ public class MonthlySalesStatisticsResponseDto {
         this.totalSalesCount = totalSalesCount;
     }
 
-    public static MonthlySalesStatisticsResponseDto of(MonthlySalesStatistics statistics) {
-        return new MonthlySalesStatisticsResponseDto(
+    public static MonthlyItemSalesStatisticsResponseDto of(MonthlyItemSalesStatistics statistics) {
+        return new MonthlyItemSalesStatisticsResponseDto(
                 statistics.getItem().getId(),
                 statistics.getYear(),
                 statistics.getMonth(),

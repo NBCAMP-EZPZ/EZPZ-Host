@@ -7,11 +7,11 @@ import com.sparta.ezpzhost.domain.item.repository.ItemRepository;
 import com.sparta.ezpzhost.domain.popup.entity.Popup;
 import com.sparta.ezpzhost.domain.popup.repository.popup.PopupRepository;
 import com.sparta.ezpzhost.domain.salesStatistics.dto.DailyPopupSalesStatisticsResponseDto;
-import com.sparta.ezpzhost.domain.salesStatistics.dto.MonthlySalesStatisticsResponseDto;
+import com.sparta.ezpzhost.domain.salesStatistics.dto.MonthlyItemSalesStatisticsResponseDto;
 import com.sparta.ezpzhost.domain.salesStatistics.entity.DailyPopupSalesStatistics;
-import com.sparta.ezpzhost.domain.salesStatistics.entity.MonthlySalesStatistics;
+import com.sparta.ezpzhost.domain.salesStatistics.entity.MonthlyItemSalesStatistics;
 import com.sparta.ezpzhost.domain.salesStatistics.repository.DailyPopupSalesStatisticsRepository;
-import com.sparta.ezpzhost.domain.salesStatistics.repository.MonthlySalesStatisticsRepository;
+import com.sparta.ezpzhost.domain.salesStatistics.repository.MonthlyItemSalesStatisticsRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class SalesStatisticsService {
 
-    private final MonthlySalesStatisticsRepository monthlySalesStatisticsRepository;
+    private final MonthlyItemSalesStatisticsRepository monthlyItemSalesStatisticsRepository;
     private final DailyPopupSalesStatisticsRepository dailyPopupSalesStatisticsRepository;
     private final ItemRepository itemRepository;
     private final PopupRepository popupRepository;
@@ -37,18 +37,19 @@ public class SalesStatisticsService {
      * @param host
      * @return
      */
-    public List<MonthlySalesStatisticsResponseDto> getMonthlySalesStatistics(
+    public List<MonthlyItemSalesStatisticsResponseDto> getMonthlyItemSalesStatistics(
             Long itemId,
             Host host) {
         if (!itemRepository.existsByIdAndHostId(itemId, host.getId())) {
             throw new CustomException(ErrorType.ITEM_ACCESS_FORBIDDEN);
         }
 
-        List<MonthlySalesStatistics> monthlySalesStatistics = monthlySalesStatisticsRepository.findByItemIdOrderByYearDescMonthDesc(
+        List<MonthlyItemSalesStatistics> monthlyItemSalesStatistics = monthlyItemSalesStatisticsRepository.findByItemIdOrderByYearDescMonthDesc(
                 itemId);
 
-        return monthlySalesStatistics.stream().map(MonthlySalesStatisticsResponseDto::of).collect(
-                Collectors.toList());
+        return monthlyItemSalesStatistics.stream().map(MonthlyItemSalesStatisticsResponseDto::of)
+                .collect(
+                        Collectors.toList());
     }
 
     /**
