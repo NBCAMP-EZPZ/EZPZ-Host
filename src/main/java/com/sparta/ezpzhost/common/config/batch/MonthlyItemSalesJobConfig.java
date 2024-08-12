@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
@@ -20,8 +21,10 @@ import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.ArgumentPreparedStatementSetter;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -45,24 +48,32 @@ public class MonthlyItemSalesJobConfig {
             PlatformTransactionManager transactionManager) {
         return new StepBuilder("monthlyItemSalesStep", jobRepository)
                 .<Map<String, Object>, MonthlyItemSalesStatistics>chunk(100, transactionManager)
-                .reader(monthlyItemSalesReader())
+                .reader(monthlyItemSalesReader(null, null))
                 .processor(monthlyItemSalesProcessor())
                 .writer(monthlyItemSalesWriter())
                 .build();
     }
 
+
     @Bean
-    public JdbcCursorItemReader<Map<String, Object>> monthlyItemSalesReader() {
+    @StepScope
+    public JdbcCursorItemReader<Map<String, Object>> monthlyItemSalesReader(
+            @Value("#{jobParameters['year']}") String year,
+            @Value("#{jobParameters['month']}") String month) {
         return new JdbcCursorItemReaderBuilder<Map<String, Object>>()
                 .dataSource(dataSource)
                 .name("monthlyItemSalesReader")
                 .sql("SELECT item_id, YEAR(orders.modified_at) AS year, MONTH(orders.modified_at) AS month, SUM(orderline.quantity) AS total_sales_count "
                         + "FROM orderline JOIN orders ON orderline.order_id = orders.order_id "
                         + "WHERE orders.order_status = 'ORDER_COMPLETED' "
+                        + "AND YEAR(orders.modified_at) = ? AND MONTH(orders.modified_at) = ? "
                         + "GROUP BY item_id, year, month")
                 .rowMapper(new ColumnMapRowMapper())
+                .preparedStatementSetter(
+                        new ArgumentPreparedStatementSetter(new Object[]{year, month}))
                 .build();
     }
+
 
     @Bean
     public ItemProcessor<Map<String, Object>, MonthlyItemSalesStatistics> monthlyItemSalesProcessor() {

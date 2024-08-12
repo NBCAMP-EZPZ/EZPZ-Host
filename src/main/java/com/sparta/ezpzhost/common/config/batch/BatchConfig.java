@@ -1,4 +1,4 @@
-package com.sparta.ezpzhost.common.config;
+package com.sparta.ezpzhost.common.config.batch;
 
 import javax.sql.DataSource;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
