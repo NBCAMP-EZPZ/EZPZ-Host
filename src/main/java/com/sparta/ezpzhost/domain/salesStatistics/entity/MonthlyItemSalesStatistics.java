@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MonthlySalesStatistics {
+public class MonthlyItemSalesStatistics {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,14 +29,15 @@ public class MonthlySalesStatistics {
     private int month;
     private int totalSalesCount;
 
-    private MonthlySalesStatistics(Item item, int year, int month, int totalSalesCount) {
+    private MonthlyItemSalesStatistics(Item item, int year, int month, int totalSalesCount) {
         this.item = item;
         this.year = year;
         this.month = month;
         this.totalSalesCount = totalSalesCount;
     }
 
-    public static MonthlySalesStatistics of(Item item, int year, int month, int totalSalesCount) {
-        return new MonthlySalesStatistics(item, year, month, totalSalesCount);
+    public static MonthlyItemSalesStatistics of(Item item, int year, int month,
+            int totalSalesCount) {
+        return new MonthlyItemSalesStatistics(item, year, month, totalSalesCount);
     }
 }

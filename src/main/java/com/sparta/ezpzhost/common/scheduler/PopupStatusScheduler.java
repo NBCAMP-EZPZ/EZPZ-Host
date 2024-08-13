@@ -17,9 +17,9 @@ public class PopupStatusScheduler {
     private final PopupRepository popupRepository;
 
     /**
-     * 종료일이 지난 팝업스토어의 상태를 변경하는 스케줄러(매일 자정에 수행)
+     * 종료일이 지난 팝업스토어의 상태를 변경하는 스케줄러(매일 01시에 수행)
      */
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
     @Transactional
     public void updatePopupStoreStatus() {
         List<Popup> activeStores = popupRepository.findByPopupStatusAndEndDateBefore(
