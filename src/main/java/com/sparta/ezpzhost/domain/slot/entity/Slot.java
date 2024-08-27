@@ -19,6 +19,9 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "slot", indexes = {
+    @Index(name = "idx_popup_slot", columnList = "popup_id, slot_id")
+})
 public class Slot extends Timestamped {
 
     @Id
